@@ -1,0 +1,13 @@
+{
+  "error" : {
+    "status" : 400,
+    "summary" : "A requisição não pode ser processada.",
+    "description" : "A requisição não pode ser processada por motivo de validação de atributos.",
+    "fieldErrors" : [ {
+      "field" : "idCultivar",
+      "entity" : "Produtividade",
+      "summary" : "Preenchimento obrigatório.",
+      "description" : "Preenchimento obrigatório."
+    } ]
+  }
+}

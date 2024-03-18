@@ -1,0 +1,14 @@
+{
+  "data" : {
+    "produtividadeAlmejada" : [ 3.7423801668418357, 3.684276232647201 ],
+    "produtividadeMediaMunicipio" : [ 3.755576981114387, 3.6972681540991714 ],
+    "temperaturaMinima" : [ 18.5, 20.3 ],
+    "temperaturaMaxima" : [ 29.6, 32.2 ],
+    "precipitacao" : [ 0.0, 0.0 ],
+    "grausDia" : [ 10.05, 22.3 ],
+    "balancoHidrico" : [ 69.34855919052535, 68.54926333308637 ],
+    "deficienciaHidrica" : [ 0.2835463321268913, 0.35997525257860397 ],
+    "excedenteHidrico" : [ 0.0, 0.0 ],
+    "isna" : [ 0.6967377202201902, 0.6894813909637197 ]
+  }
+}

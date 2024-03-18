@@ -1,0 +1,27 @@
+{
+  "data" : {
+    "interpretacaoSaturacaoPorBases" : "Baixa",
+    "interpretacaoFosforo" : "Alta",
+    "interpretacaoPotassio" : "Baixa",
+    "doseCalcario" : 1,
+    "observacoesCalagem" : "1. A dose de calcário foi calculada visando atingir uma saturação por bases em torno de 50%. Para atingir valores diferentes é necessário recalcular a dose, utilizando-se a fórmula tradicional: Dose (t/ha) = {(V desejado – V atual) x T} / PRNT.\n2. Para solos com teor de magnésio (Mg) inferior a 0,5 cmolc/dm3, utilizar preferencialmente o calcário dolomítico ou magnesiano. Observe, também, a relação Ca/Mg do solo, que deve se situar em torno de 3/1;\n3. Para que o calcário produza os efeitos desejáveis, é necessário haver umidade suficiente no solo para promover sua reação;\n4. A forma mais comum de aplicação é aquela em que se distribui o calcário uniformemente na superfície do terreno, seguida de incorporação. Contudo, quando a lavoura vem adotando o sistema plantio/semeadura direto, deve-se evitar a incorporação, ou seja, deixar na superfície;\n5. Em solos com predominância de argilas de alta atividade (2:1) é recomendável calcular a necessidade de calcário pelo critério SMP.\n",
+    "totalNitrogenio" : 0,
+    "totalFosforo" : 40,
+    "totalPotassio" : 90,
+    "semeaduraPlantioNitrogenio" : 0,
+    "semeaduraPlantioFosforo" : 40,
+    "semeaduraPlantioPotassio" : 90,
+    "coberturaNitrogenio" : 0,
+    "formulacoesSugeridas" : [ {
+      "composicaoNPK" : "0-14-30",
+      "dose" : 300
+    }, {
+      "composicaoNPK" : "0-10-23",
+      "dose" : 400
+    }, {
+      "composicaoNPK" : "0-8-18",
+      "dose" : 500
+    } ],
+    "observacoesAdubacao" : "1. A análise de uma amostra de solo é instrumento importante para auxiliar no processo de recomendação de adubação, contudo requer a coleta de uma amostra representativa. Deve-se coletar uma amostra de cada gleba da propriedade, resultante da mistura de várias sub-amostras. (Sugere-se consultar arquivo WebAgritec-amostragem do solo); \n2. Adubação nitrogenada - A quantidade total de N recomendada pode ser reduzida em cerca de 30% quando o solo apresentar teor alto de matéria orgânica. A dosagem de N em cobertura, quando recomendada, deve ser aplicada durante o desenvolvimento da cultura. Caso esta dosagem seja superior a 60 kg/ha, pode-se parcelar em duas aplicações. A aplicação deve ser feita em solo úmido e, quando possível, com leve incorporação ao solo; \n3. Adubação potássica - Quando o solo for arenoso ou a recomendação de adubação exceder 60 kg/ha de K2O, sugere-se aplicar metade da dose no plantio e metade junto com a cobertura de nitrogênio; \n4. Em lavouras aonde vem sendo utilizadas fontes de fertilizantes ou formulações de alta concentração (soma de N+P2O5+K2O acima de 35), existe grande probabilidade de ocorrer deficiência de enxofre (S) (veja foto ilustrativa). Neste caso, aplicar de 15 a 30 kg/ha de S; \n5. Em solos da região do cerrado e em solos arenosos, tem sido comum a deficiência de micronutrientes (Zn, Mn, Cu e B), (veja fotos ilustrativas). Neste caso, avaliar a disponibilidade, mediante análise de amostra de solo e aplicar fórmula NPK, com micronutrientes; \n6. A eficiência da adubação pode ser limitada pela ocorrência de camada compactada no solo, problema mais freqüente em lavouras sob preparo convencional. A solução deste problema abrange desde o cultivo de plantas descompactadoras até a subsolagem. (Veja detalhes no arquivo WebAgritec-compactação); \n7. Informações adicionais podem ser obtidas:\nDocumentos:\n- Manual de adubação e calagem para os estados do Rio Grande do Sul e Santa Catarina, 2004.\n- CERRADO. Correção do solo e adubação, 2002.\n-Recomendações para o uso de corretivos e fertilizantes em Minas gerais, 1999.\n- Boletim Técnico 100, IAC, 1996.\nInstituições:\nEmbrapa.\nInstituições estaduais de pesquisa."
+  }
+}

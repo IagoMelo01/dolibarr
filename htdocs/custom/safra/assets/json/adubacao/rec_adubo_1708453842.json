@@ -1,0 +1,7 @@
+{
+  "error" : {
+    "status" : 500,
+    "summary" : "Aconteceu algum erro no servidor.",
+    "description" : "Aconteceu algum erro no servidor."
+  }
+}
