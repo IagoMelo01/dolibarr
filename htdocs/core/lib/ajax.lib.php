@@ -491,7 +491,7 @@ function ajax_combobox($htmlname, $events = array(), $minLengthToAutocomplete = 
 		$msg .= ' dropdownAutoWidth: true, dropdownParent: $(\'#'.$htmlname.'\').parent(), '."\n";
 	}
 	$msg .= '		width: \''.dol_escape_js($widthTypeOfAutocomplete).'\',		/* off or resolve */
-					minimumInputLength: '.((int) $minLengthToAutocomplete).',
+					minimumInputLength: '. ($htmlname == "options_fk_cultivar" ? 3 : (int) $minLengthToAutocomplete) .',
 					language: select2arrayoflanguage,
 					matcher: function (params, data) {
 						if ($.trim(params.term) === "") {
