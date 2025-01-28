@@ -3334,7 +3334,7 @@ class Form
 
 		if (isModEnabled('stock') && isset($objp->stock) && ($objp->fk_product_type == Product::TYPE_PRODUCT || getDolGlobalString('STOCK_SUPPORTS_SERVICES'))) {
 			if ($user->hasRight('stock', 'lire')) {
-				$opt .= ' - ' . $langs->trans("Stock") . ': ' . price(price2num($objp->stock, 'MS'));
+				$opt .= ' - ' . $langs->trans("Stock") . ': ' . price(price2num($objp->stock, 'MS'), 0, $langs, 0, 0);
 
 				if ($objp->stock > 0) {
 					$outval .= ' - <span class="product_line_stock_ok">';
@@ -8890,7 +8890,8 @@ class Form
 								escapeMarkup: function (markup) { return markup; }, 	// let our custom formatter work
 								// Specify format function for selected item
 								formatSelection: formatSelection,
-							 	templateSelection: formatSelection		/* For 4.0 */
+							 	templateSelection: formatSelection,		/* For 4.0 */
+							 	language: select2arrayoflanguage
 							});
 
 							/* Add also morecss to the css .select2 that is after the #htmlname, for component that are show dynamically after load, because select2 set
