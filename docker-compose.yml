@@ -18,7 +18,7 @@ services:
       PHP_MEMORY_LIMIT: "512M"
       PHP_MAX_INPUT_VARS: "5000"
     volumes:
-      - ./dolibarr:/var/www/html              # seu fork (com htdocs/)
+      - ./:/var/www/html              # seu fork (com htdocs/)
       - /root/dolifevo/documents:/var/www/html/documents   # persistência
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost/index.php >/dev/null || exit 1"]
