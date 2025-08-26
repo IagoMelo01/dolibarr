@@ -1,24 +1,25 @@
-version: "3.9"
-
 services:
   app:
-    image: ghcr.io/dolibarr/dolibarr:php8.2-apache  # imagem com PHP+Apache e extensões
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_UID: 1000
+        APP_GID: 1000
+        PHP_VERSION: "8.2"   # altere p/ 8.1 ou 8.0 se seu fork exigir
     container_name: dolibarr-app
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - "8008:80"
+      - "8080:80"
     environment:
-      # Ajustes PHP comuns (opcionais)
       PHP_MEMORY_LIMIT: "512M"
       PHP_MAX_INPUT_VARS: "5000"
     volumes:
-      # monta seu código dentro do container (usa seu Dolibarr customizado)
-      - ./dolibarr:/var/www/html
-      # documentos persistentes
-      - ./documents:/var/www/html/documents
+      - ./dolibarr:/var/www/html              # seu fork (com htdocs/)
+      - /root/dolifevo/documents:/var/www/html/documents   # persistência
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost/index.php >/dev/null || exit 1"]
       interval: 30s
