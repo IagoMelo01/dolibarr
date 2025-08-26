@@ -250,21 +250,25 @@ function dol_dir_list($utf8_path, $types = "all", $recursive = 0, $filter = "", 
  * Scan a directory and return a list of files/directories.
  * Content for string is UTF8 and dir separator is "/".
  *
- * @param	string		$path        	Starting path from which to search. Example: 'produit/MYPROD'
+ * @param	string		$path        	Starting path from which to search. Example: 'produit/MYPROD' or 'produit/%'
  * @param	string		$filter        	Regex filter to restrict list. This regex value must be escaped for '/', since this char is used for preg_match function
  * @param	string[]|null	$excludefilter  Array of Regex for exclude filter (example: array('(\.meta|_preview.*\.png)$','^\.'))
  * @param	string		$sortcriteria	Sort criteria ("","fullname","name","date","size")
  * @param	int			$sortorder		Sort order (SORT_ASC, SORT_DESC)
  * @param	int			$mode			0=Return array minimum keys loaded (faster), 1=Force all keys like description
  * @param	string		$sqlfilters		Filter as an Universal Search string.
+ * @param	?Object		$object			Object used
  * 										Example: '((client:=:1) OR ((client:>=:2) AND (client:<=:3))) AND (client:!=:8) AND (nom:like:'a%')'
  * @return	array<array{rowid:string,label:string,name:string,path:string,level1name:string,fullname:string,fullpath_orig:string,date_c:string,date_m:string,type:string,keywords:string,cover:string,position:int,acl:string,share:string,description:string}> Array of array('name'=>'xxx','fullname'=>'/abc/xxx','date'=>'yyy','size'=>99,'type'=>'dir|file',...)
  * @see dol_dir_list()
  */
-function dol_dir_list_in_database($path, $filter = "", $excludefilter = null, $sortcriteria = "name", $sortorder = SORT_ASC, $mode = 0, $sqlfilters = "")
+function dol_dir_list_in_database($path, $filter = "", $excludefilter = null, $sortcriteria = "name", $sortorder = SORT_ASC, $mode = 0, $sqlfilters = "", $object = null)
 {
 	global $conf, $db;
 
+	if (is_null($object)) {
+		$object = new stdClass();
+	}
 
 	$sql = " SELECT rowid, label, entity, filename, filepath, fullpath_orig, keywords, cover, gen_or_uploaded, extraparams,";
 	$sql .= " date_c, tms as date_m, fk_user_c, fk_user_m, acl, position, share";
@@ -272,9 +276,13 @@ function dol_dir_list_in_database($path, $filter = "", $excludefilter = null, $s
 		$sql .= ", description";
 	}
 	$sql .= " FROM ".MAIN_DB_PREFIX."ecm_files";
-	$sql .= " WHERE entity = ".$conf->entity;
+	if (!empty($object->entity) && $object->entity != $conf->entity) {
+		$sql .= " WHERE entity = ".((int) $object->entity);
+	} else {
+		$sql .= " WHERE entity = ".((int) $conf->entity);
+	}
 	if (preg_match('/%$/', $path)) {
-		$sql .= " AND filepath LIKE '".$db->escape($path)."'";
+		$sql .= " AND (filepath LIKE '".$db->escape($path)."' OR filepath = '".$db->escape(preg_replace('/\/%$/', '', $path))."')";
 	} else {
 		$sql .= " AND filepath = '".$db->escape($path)."'";
 	}
@@ -346,13 +354,18 @@ function dol_dir_list_in_database($path, $filter = "", $excludefilter = null, $s
  *
  * @param	array<array{name:string,path:string,level1name:string,relativename:string,fullname:string,date:string,size:int,perm:int,type:string}>	$filearray	Array of array('name'=>'xxx','fullname'=>'/abc/xxx','date'=>'yyy','size'=>99,'type'=>'dir|file',...) Array of files obtained using dol_dir_list
  * @param	string	$relativedir		Relative dir from DOL_DATA_ROOT
+ * @param	?Object	$object				Object used
  * @return	void
  */
-function completeFileArrayWithDatabaseInfo(&$filearray, $relativedir)
+function completeFileArrayWithDatabaseInfo(&$filearray, $relativedir, $object = null)
 {
 	global $conf, $db, $user;
 
-	$filearrayindatabase = dol_dir_list_in_database($relativedir, '', null, 'name', SORT_ASC);
+	if (is_null($object)) {
+		$object = new stdClass();
+	}
+
+	$filearrayindatabase = dol_dir_list_in_database($relativedir, '', null, 'name', SORT_ASC, 0, '', $object);
 
 	// TODO Remove this when PRODUCT_USE_OLD_PATH_FOR_PHOTO will be removed
 	global $modulepart;
@@ -1588,6 +1601,7 @@ function dol_delete_file($file, $disableglob = 0, $nophperrors = 0, $nohook = 0,
 					}
 				}
 			} else {
+				$ok = true; // nothing to delete when glob is on must return ok
 				dol_syslog("No files to delete found", LOG_DEBUG);
 			}
 		} else {
@@ -1902,11 +1916,11 @@ function dol_init_file_process($pathtoscan = '', $trackid = '')
  * @param   string		$trackid			Track id (used to prefix name of session vars to avoid conflict)
  * @param	int<0,1>	$generatethumbs		1=Generate also thumbs for uploaded image files
  * @param   ?Object		$object				Object used to set 'src_object_*' fields
- * @param	string		$forceFullTestIndexation		'1'=Force full text storage in database even if global option not set (consume a high level of data)
+ * @param	string		$forceFullTextIndexation		'1'=Force full text storage in database even if global option not set (consume a high level of data)
  * @return	int                             Return integer <=0 if KO, nb of success if OK (>0)
  * @see dol_remove_file_process()
  */
-function dol_add_file_process($upload_dir, $allowoverwrite = 0, $updatesessionordb = 0, $varfiles = 'addedfile', $savingdocmask = '', $link = null, $trackid = '', $generatethumbs = 1, $object = null, $forceFullTestIndexation = '')
+function dol_add_file_process($upload_dir, $allowoverwrite = 0, $updatesessionordb = 0, $varfiles = 'addedfile', $savingdocmask = '', $link = null, $trackid = '', $generatethumbs = 1, $object = null, $forceFullTextIndexation = '')
 {
 	global $db, $user, $conf, $langs;
 
@@ -1982,7 +1996,7 @@ function dol_add_file_process($upload_dir, $allowoverwrite = 0, $updatesessionor
 				// Move file from temp directory to final directory. A .noexe may also be appended on file name.
 				$resupload = dol_move_uploaded_file($TFile['tmp_name'][$i], $destfull, $allowoverwrite, 0, $TFile['error'][$i], 0, $varfiles, $upload_dir);
 
-				if (is_numeric($resupload) && $resupload > 0) {   // $resupload can be 'ErrorFileAlreadyExists'
+				if (is_numeric($resupload) && $resupload > 0) {   // $resupload can be 'ErrorFileAlreadyExists', 'ErrorFileIsInfectedWithAVirus...'
 					include_once DOL_DOCUMENT_ROOT.'/core/lib/images.lib.php';
 
 					$tmparraysize = getDefaultImageSizes();
@@ -2027,7 +2041,7 @@ function dol_add_file_process($upload_dir, $allowoverwrite = 0, $updatesessionor
 							deleteFilesIntoDatabaseIndex($upload_dir, basename($destfile).($resupload == 2 ? '.noexe' : ''), '');
 						}
 
-						$result = addFileIntoDatabaseIndex($upload_dir, basename($destfile).($resupload == 2 ? '.noexe' : ''), $TFile['name'][$i], 'uploaded', $sharefile, $object);
+						$result = addFileIntoDatabaseIndex($upload_dir, basename($destfile).($resupload == 2 ? '.noexe' : ''), $TFile['name'][$i], 'uploaded', $sharefile, $object, $forceFullTextIndexation);
 						if ($result < 0) {
 							if ($allowoverwrite) {
 								// Do not show error message. We can have an error due to DB_ERROR_RECORD_ALREADY_EXISTS
@@ -2046,7 +2060,7 @@ function dol_add_file_process($upload_dir, $allowoverwrite = 0, $updatesessionor
 						if (preg_match('/File is a PDF with javascript inside/', $resupload)) {
 							setEventMessages($langs->trans("ErrorFileIsAnInfectedPDFWithJSInside"), null, 'errors');
 						} else {
-							setEventMessages($langs->trans("ErrorFileIsInfectedWithAVirus"), null, 'errors');
+							setEventMessages($langs->trans("ErrorFileIsInfectedWithAVirus").'<br>'.dolGetFirstLineOfText($resupload), null, 'errors');
 						}
 					} else { // Known error
 						setEventMessages($langs->trans($resupload), null, 'errors');
@@ -2865,6 +2879,8 @@ function dol_check_secure_access_document($modulepart, $original_file, $entity, 
 	} elseif ($modulepart == 'expedition' && strpos($original_file, 'receipt/') === 0) {
 		// Fix modulepart delivery
 		$modulepart = 'delivery';
+	} elseif ($modulepart == 'propale') {
+		$modulepart = 'propal';
 	}
 
 	//print 'dol_check_secure_access_document modulepart='.$modulepart.' original_file='.$original_file.' entity='.$entity;
@@ -2908,7 +2924,7 @@ function dol_check_secure_access_document($modulepart, $original_file, $entity, 
 			$entity = 1;
 		}
 		$accessallowed = 1;
-		$original_file = (empty($conf->medias->multidir_output[$entity]) ? $conf->medias->dir_output : $conf->medias->multidir_output[$entity]).'/'.$original_file;
+		$original_file = (empty($conf->medias->multidir_output[$entity]) ? (empty($conf->medias->dir_output) ? DOL_DATA_ROOT.'/medias' : $conf->medias->dir_output) : $conf->medias->multidir_output[$entity]).'/'.$original_file;
 	} elseif ($modulepart == 'logs' && !empty($dolibarr_main_data_root)) {
 		// Wrapping for *.log files, like when used with url http://.../document.php?modulepart=logs&file=dolibarr.log
 		$accessallowed = ($user->admin && basename($original_file) == $original_file && preg_match('/^dolibarr.*\.(log|json)$/', basename($original_file)));
@@ -3176,7 +3192,7 @@ function dol_check_secure_access_document($modulepart, $original_file, $entity, 
 		$original_file = $conf->fckeditor->dir_output.'/'.$original_file;
 	} elseif ($modulepart == 'user' && !empty($conf->user->dir_output)) {
 		// Wrapping for users
-		$canreaduser = (!empty($fuser->admin) || $fuser->hasRight('user', 'user', 'lire'));
+		$canreaduser = (!empty($fuser->admin) || $fuser->hasRight('user', 'user', $lire));
 		if ($fuser->id == (int) $refname) {
 			$canreaduser = 1;
 		} // A user can always read its own card
@@ -3562,7 +3578,7 @@ function dol_check_secure_access_document($modulepart, $original_file, $entity, 
 				exit;
 			}
 
-			// Check fuser->rights->modulepart->myobject->read and fuser->rights->modulepart->read
+			// Check fuser->hasRight('modulepart', 'myobject', 'read') and fuser->hasRight('modulepart', 'read')
 			$partsofdirinoriginalfile = explode('/', $original_file);
 			if (!empty($partsofdirinoriginalfile[1])) {	// If original_file is xxx/filename (xxx is a part we will use)
 				$partofdirinoriginalfile = $partsofdirinoriginalfile[0];
@@ -3570,7 +3586,7 @@ function dol_check_secure_access_document($modulepart, $original_file, $entity, 
 					$accessallowed = 1;
 				}
 			}
-			if ($fuser->hasRight($modulepart, $lire) || $fuser->hasRight($modulepart, $read)) {
+			if (($fuser->hasRight($modulepart, $lire) || $fuser->hasRight($modulepart, $read)) || ($fuser->hasRight($modulepart, 'all', $lire) || $fuser->hasRight($modulepart, 'all', $read))) {
 				$accessallowed = 1;
 			}
 

@@ -92,11 +92,16 @@ if (!isset($form) || !is_object($form)) {
 	$form = new Form($db);
 }
 
-// Title
-$title = $langs->trans("HomeArea").' - Dolibarr '.DOL_VERSION;
-if (getDolGlobalString('MAIN_APPLICATION_TITLE')) {
-	$title = $langs->trans("HomeArea").' - ' . getDolGlobalString('MAIN_APPLICATION_TITLE');
+$appli = constant('DOL_APPLICATION_TITLE');
+$applicustom = getDolGlobalString('MAIN_APPLICATION_TITLE');
+if ($applicustom) {
+	$appli = (preg_match('/^\+/', $applicustom) ? $appli : '').$applicustom;
+} else {
+	$appli .= " ".DOL_VERSION;
 }
+
+// Title
+$title = $langs->trans("HomeArea").' - '.$appli;
 
 llxHeader('', $title);
 
@@ -570,7 +575,7 @@ if (!getDolGlobalString('MAIN_DISABLE_GLOBAL_WORKBOARD') && getDolGlobalInt('MAI
 				$openedDashBoard .= '</span>'."\n";
 				$openedDashBoard .= '<div class="info-box-content">'."\n";
 
-				$openedDashBoard .= '<div class="info-box-title" title="'.strip_tags($groupName).'">'.$groupName.'</div>'."\n";
+				$openedDashBoard .= '<div class="info-box-title" title="'.dolPrintHTMLForAttribute($groupName).'">'.$groupName.'</div>'."\n";
 				$openedDashBoard .= '<div class="info-box-lines">'."\n";
 
 				foreach ($boards as $board) {
@@ -592,7 +597,7 @@ if (!getDolGlobalString('MAIN_DISABLE_GLOBAL_WORKBOARD') && getDolGlobalInt('MAI
 					$textLate = '';
 					if ($board->nbtodolate > 0) {
 						$textLate .= '<span title="'.dol_escape_htmltag($textLateTitle).'" class="classfortooltip badge badge-warning">';
-						$textLate .= '<i class="fa fa-exclamation-triangle"></i> '.$board->nbtodolate;
+						$textLate .= '<i class="fa fa-exclamation-triangle hideonsmartphone"></i> '.$board->nbtodolate;
 						$textLate .= '</span>';
 					}
 

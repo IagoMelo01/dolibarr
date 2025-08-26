@@ -307,7 +307,7 @@ class pdf_timespent extends ModelePDFProjects
 					//$progress=($object->lines[$i]->progress?$object->lines[$i]->progress.'%':'');
 					$datestart = dol_print_date($object->lines[$i]->date_start, 'day');
 					$dateend = dol_print_date($object->lines[$i]->date_end, 'day');
-					$duration = convertSecondToTime((int) $object->lines[$i]->duration, 'allhourmin');
+					$duration = convertSecondToTime((int) $object->lines[$i]->duration_effective, 'allhourmin');
 
 					$showpricebeforepagebreak = 1;
 
@@ -522,8 +522,6 @@ class pdf_timespent extends ModelePDFProjects
 	 */
 	protected function _tableau(&$pdf, $tab_top, $tab_height, $nexY, $outputlangs, $hidetop = 0, $hidebottom = 0)
 	{
-		global $conf, $mysoc;
-
 		$heightoftitleline = 10;
 
 		$default_font_size = pdf_getPDFFontSize($outputlangs);

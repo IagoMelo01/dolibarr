@@ -868,11 +868,13 @@ class EmailCollector extends CommonObject
 		if (function_exists('mb_convert_encoding')) {
 			// change spaces by entropy because mb_convert fail with spaces
 			$str = preg_replace("/ /", "xxxSPACExxx", $str);		// the replacement string must be valid in utf7 so _ can't be used
+			$str = preg_replace("/_/", "xxxUNDERSCORExxx", $str); // encode underscore to avoid encoding issues with mb_convert
 			$str = preg_replace("/\[Gmail\]/", "xxxGMAILxxx", $str);	// the replacement string must be valid in utf7 so _ can't be used
 			// if mb_convert work
 			if ($str = mb_convert_encoding($str, "UTF-7")) {
 				// change characters
 				$str = preg_replace("/\+A/", "&A", $str);
+				$str = preg_replace("/xxxUNDERSCORExxx/", "_", $str);
 				// change to spaces again
 				$str = preg_replace("/xxxSPACExxx/", " ", $str);
 				// change to [Gmail] again
@@ -1165,6 +1167,7 @@ class EmailCollector extends CommonObject
 		$arrayofemail = array();
 
 		$now = dol_now();
+		$datelastok = $now;
 
 		if (empty($this->host)) {
 			$this->error = $langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv('EMailHost'));
@@ -2324,7 +2327,7 @@ class EmailCollector extends CommonObject
 									$trackid = $objectemail->track_id;
 								}
 								if (empty($objectemail->origin_references)) {
-									$objectemail->origin_references = $headers['References'];
+									$objectemail->origin_references = !empty($headers['References']) ? $headers['References'] : null;
 									$changeonticket_references = true;
 								} else {
 									foreach ($arrayofreferences as $key => $referencetmp) {
@@ -2678,6 +2681,7 @@ class EmailCollector extends CommonObject
 											// Search into contacts of thirdparties to try to guess the thirdparty to use
 											$resultContact = $contactstatic->findNearest(0, '', '', '', $emailtouseforthirdparty, '', 0);
 											if ($resultContact > 0) {
+												$contactstatic->fetch($resultContact);
 												$idtouseforthirdparty = $contactstatic->socid;
 												$result = $thirdpartystatic->fetch($idtouseforthirdparty);
 												if ($result > 0) {
@@ -2938,7 +2942,7 @@ class EmailCollector extends CommonObject
 										$this->errors = $actioncomm->errors;
 									} else {
 										if ($fk_element_type == "ticket" && is_object($objectemail)) {
-											if ($objectemail->status == Ticket::STATUS_CLOSED || $objectemail->status == Ticket::STATUS_CANCELED) {
+											if ($objectemail->status == Ticket::STATUS_CLOSED || $objectemail->status == Ticket::STATUS_CANCELED || $objectemail->status == Ticket::STATUS_NEED_MORE_INFO || $objectemail->status == Ticket::STATUS_WAITING) {
 												if ($objectemail->fk_user_assign != null) {
 													$res = $objectemail->setStatut(Ticket::STATUS_ASSIGNED);
 												} else {
@@ -3414,6 +3418,13 @@ class EmailCollector extends CommonObject
 										$tickettocreate->context['actionmsg'] = $langs->trans("ActionAC_EMAIL_IN").' - '.$langs->trans("TICKET_CREATEInDolibarr");
 										//$tickettocreate->email_fields_no_propagate_in_actioncomm = 0;
 
+										// Add sender to context array to make sure that confirmation e-mail can be sent by trigger script
+										$sender_contact = new Contact($this->db);
+										$sender_contact->fetch(0, null, '', $from);
+										if (!empty($sender_contact->id)) {
+											$tickettocreate->context['contactid'] = $sender_contact->id;
+										}
+
 										$result = $tickettocreate->create($user);
 										if ($result <= 0) {
 											$errorforactions++;
@@ -3429,7 +3440,7 @@ class EmailCollector extends CommonObject
 													foreach ($attachments as $attachment) {
 														// $attachment->save($destdir.'/');
 														$typeattachment = (string) $attachment->getDisposition();
-														$filename = $attachment->getFilename();
+														$filename = $attachment->getName();
 														$content = $attachment->getContent();
 														$this->saveAttachment($destdir, $filename, $content);
 													}
@@ -3635,6 +3646,7 @@ class EmailCollector extends CommonObject
 					// Stop the loop to process email if we reach maximum collected per collect
 					if ($this->maxemailpercollect > 0 && $nbemailok >= $this->maxemailpercollect) {
 						dol_syslog("EmailCollect::doCollectOneCollector We reach maximum of ".$nbemailok." collected with success, so we stop this collector now.");
+						$datelastok = strtotime($headers['Date']); // Set datetime
 						break;
 					}
 				} else {
@@ -3736,7 +3748,7 @@ class EmailCollector extends CommonObject
 		}
 
 		if (empty($error) && empty($mode)) {
-			$this->datelastok = $now;
+			$this->datelastok = $datelastok;
 		}
 
 		if (!empty($this->errors)) {

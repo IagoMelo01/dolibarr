@@ -202,6 +202,13 @@ class SecurityTest extends CommonClassTest
 		$result = testSqlAndScriptInject($test, 0);
 		$this->assertGreaterThanOrEqual($expectedresult, $result, 'Error on testSqlAndScriptInject bbb');
 
+		$test='<marquee onbeforeintput="alert(1)">';
+		$result=testSqlAndScriptInject($test, 0);
+		$this->assertGreaterThanOrEqual($expectedresult, $result, 'Error on testSqlAndScriptInject onbeforeintput');
+		$test='<marquee onbounce="alert(1)">';
+		$result=testSqlAndScriptInject($test, 0);
+		$this->assertGreaterThanOrEqual($expectedresult, $result, 'Error on testSqlAndScriptInject onbounce');
+
 		$test = '<SCRIPT SRC=http://xss.rocks/xss.js></SCRIPT>';
 		$result = testSqlAndScriptInject($test, 0);
 		$this->assertGreaterThanOrEqual($expectedresult, $result, 'Error on testSqlAndScriptInject ccc');
@@ -659,6 +666,18 @@ class SecurityTest extends CommonClassTest
 		print "result = ".$result."\n";
 		$this->assertStringContainsString('Bad string syntax to evaluate', $result, 'The string was not detected as evil');
 
+		$result = dol_eval('json_encode(array_map(implode("",["ex","ec"]), ["id"]))', 1, 1, '1');		// result of dol_eval may be an object Closure
+		print "result4a = ".json_encode($result)."\n";
+		$this->assertStringContainsString('Bad string syntax to evaluate', json_encode($result), 'The string was not detected as evil, it should due to the [ char and method "2"');
+
+		$result = dol_eval('json_encode(array_map(implode("",["ex","ec"]), ["id"]))', 1, 1, '2');		// result of dol_eval may be an object Closure
+		print "result4b = ".json_encode($result)."\n";
+		$this->assertStringContainsString('Bad string syntax to evaluate', json_encode($result), 'The string was not detected as evil, it should due to the use of array_map');
+
+		$result = dol_eval('json_encode(array_map(implode("",array("ex","ec"), array("id")))', 1, 1, '1');		// result of dol_eval may be an object Closure
+		print "result4c = ".json_encode($result)."\n";
+		$this->assertStringContainsString('Bad string syntax to evaluate', json_encode($result), 'The string was not detected as evil, it should due to the use of array_map');
+
 		$result = dol_eval('$a=function() { }; $a', 1, 1, '0');		// result of dol_eval may be an object Closure
 		print "result5 = ".json_encode($result)."\n";
 		$this->assertStringContainsString('Bad string syntax to evaluate', json_encode($result), 'The string was not detected as evil');
@@ -678,6 +697,8 @@ class SecurityTest extends CommonClassTest
 		$result = (string) dol_eval("strrev('metsys') ('whoami')", 1, 1);
 		print "result8b = ".$result."\n";
 		$this->assertStringContainsString('Bad string syntax to evaluate', $result, 'The string was not detected as evil');
+
+		$conf->global->MAIN_DISALLOW_STRING_OBFUSCATION_IN_DOL_EVAL = 1;
 
 		$result = (string) dol_eval('$a="test"; $$a;', 1, 0);
 		print "result9 = ".$result."\n";
@@ -702,6 +723,7 @@ class SecurityTest extends CommonClassTest
 		// Must be allowed
 
 		global $leftmenu;	// Used into strings to eval
+		$conf->global->MAIN_FEATURES_LEVEL = 1;
 
 		$leftmenu = 'AAA';
 		$result = dol_eval('$conf->currency && preg_match(\'/^(AAA|BBB)/\',$leftmenu)', 1, 1, '1');
@@ -726,7 +748,7 @@ class SecurityTest extends CommonClassTest
 
 		$leftmenu = 'XXX';
 		$conf->global->MAIN_FEATURES_LEVEL = 1;		// Force for the case option is -1
-		$string = '(isModEnabled("agenda") || isModEnabled("resource")) && getDolGlobalInt("MAIN_FEATURES_LEVEL") >= 0 && preg_match(\'/^(admintools|all|XXX)/\', $leftmenu)';
+		$string = '(isModEnabled("user") || isModEnabled("resource")) && getDolGlobalInt("MAIN_FEATURES_LEVEL") >= 0 && preg_match(\'/^(admintools|all|XXX)/\', $leftmenu)';
 		$result = dol_eval($string, 1, 1, '1');
 		print "result17 = ".$result."\n";
 		$this->assertTrue($result);

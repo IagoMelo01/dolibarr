@@ -204,7 +204,7 @@ function pdf_getInstance($format = '', $metric = 'mm', $pagetype = 'P')
 		*/
 
 		// For TCPDF, we specify permission we want to block
-		$pdfrights = (getDolGlobalString('PDF_SECURITY_ENCRYPTION_RIGHTS') ? json_decode($conf->global->PDF_SECURITY_ENCRYPTION_RIGHTS, true) : array('modify', 'copy')); // Json format in llx_const
+		$pdfrights = (getDolGlobalString('PDF_SECURITY_ENCRYPTION_RIGHTS') ? json_decode(getDolGlobalString('PDF_SECURITY_ENCRYPTION_RIGHTS'), true) : array('modify', 'copy')); // Json format in llx_const
 
 		// Password for the end user
 		$pdfuserpass = getDolGlobalString('PDF_SECURITY_ENCRYPTION_USERPASS');
@@ -217,7 +217,7 @@ function pdf_getInstance($format = '', $metric = 'mm', $pagetype = 'P')
 
 		// Array of recipients containing public-key certificates ('c') and permissions ('p').
 		// For example: array(array('c' => 'file://../examples/data/cert/tcpdf.crt', 'p' => array('print')))
-		$pubkeys = (getDolGlobalString('PDF_SECURITY_ENCRYPTION_PUBKEYS') ? json_decode($conf->global->PDF_SECURITY_ENCRYPTION_PUBKEYS, true) : null); // Json format in llx_const
+		$pubkeys = (getDolGlobalString('PDF_SECURITY_ENCRYPTION_PUBKEYS') ? json_decode(getDolGlobalString('PDF_SECURITY_ENCRYPTION_PUBKEYS'), true) : null); // Json format in llx_const
 
 		$pdf->SetProtection($pdfrights, $pdfuserpass, $pdfownerpass, $encstrength, $pubkeys);
 	}
@@ -328,7 +328,8 @@ function pdf_getHeightForLogo($logo, $url = false)
 }
 
 /**
- * Function to try to calculate height of a HTML Content
+ * Function to try to calculate height of a HTML Content.
+ * WARNING: Do not use this function inside a TCPDF transaction.
  *
  * @param 	TCPDF     $pdf				PDF initialized object
  * @param 	string    $htmlcontent		HTML Content
@@ -339,6 +340,9 @@ function pdfGetHeightForHtmlContent(&$pdf, $htmlcontent)
 {
 	// store current object
 	$pdf->startTransaction();
+	// To avoid pagebreak effect or strange behavior of writeHTMLCell when we are out of page, we imagine we are at the begin of page to test the height of the text
+	// Another solution would be to do the test on another PDF instance with samefont, width...
+	$pdf->setY(0);
 	// store starting values
 	$start_y = $pdf->GetY();
 	//var_dump($start_y);
@@ -1212,7 +1216,7 @@ function pdf_pagefoot(&$pdf, $outputlangs, $paramfreetext, $fromcompany, $marge_
 	$pdf->SetDrawColor(224, 224, 224);
 	// Option for footer text color
 	if (getDolGlobalString('PDF_FOOTER_TEXT_COLOR')) {
-		list($r, $g, $b) = sscanf($conf->global->PDF_FOOTER_TEXT_COLOR, '%d, %d, %d');
+		list($r, $g, $b) = sscanf(getDolGlobalString('PDF_FOOTER_TEXT_COLOR'), '%d, %d, %d');
 		$pdf->SetTextColor($r, $g, $b);
 	}
 
@@ -1231,7 +1235,7 @@ function pdf_pagefoot(&$pdf, $outputlangs, $paramfreetext, $fromcompany, $marge_
 			$freetextheight = $pdf->getStringHeight($width, $line);
 		} else {
 			$freetextheight = pdfGetHeightForHtmlContent($pdf, dol_htmlentitiesbr($line, 1, 'UTF-8', 0)); // New method (works for HTML content)
-			//print '<br>'.$freetextheight;exit;
+			//print '<br>'.$freetextheight;
 		}
 	}
 
@@ -1453,6 +1457,8 @@ function pdf_writelinedesc(&$pdf, $object, $i, $outputlangs, $w, $h, $posx, $pos
 		}
 		$parameters = array('pdf' => $pdf, 'i' => $i, 'outputlangs' => $outputlangs, 'w' => $w, 'h' => $h, 'posx' => $posx, 'posy' => $posy, 'hideref' => $hideref, 'hidedesc' => $hidedesc, 'issupplierline' => $issupplierline, 'special_code' => $special_code);
 		$action = '';
+		// WARNING: A hook must not close/open the PDF transaction. Doing this generates a lot of trouble.
+		// Test to know if content added by the hooks is already done by the main caller of pdf_writelinedesc
 		$reshook = $hookmanager->executeHooks('pdf_writelinedesc', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
 
 		if (!empty($hookmanager->resPrint)) {
@@ -1842,7 +1848,9 @@ function pdf_getlinedesc($object, $i, $outputlangs, $hideref = 0, $hidedesc = 0,
 			if ($detail->batch) {
 				$dte[] = $outputlangs->transnoentitiesnoconv('printBatch', $detail->batch);
 			}
-			$dte[] = $outputlangs->transnoentitiesnoconv('printQty', $detail->qty);
+			if ($detail->qty) {
+				$dte[] = $outputlangs->transnoentitiesnoconv('printQty', $detail->qty);
+			}
 
 			// Add also info of planned warehouse for lot
 			if ($object->element == 'shipping' && $detail->fk_origin_stock > 0 && getDolGlobalInt('PRODUCTBATCH_SHOW_WAREHOUSE_ON_SHIPMENT')) {
@@ -2007,7 +2015,7 @@ function pdf_getlinevatrate($object, $i, $outputlangs, $hidedetails = 0)
 
 			$tmpresult .= vatrate($object->lines[$i]->tva_tx, 0, $object->lines[$i]->info_bits, -1);
 			if (!getDolGlobalString('MAIN_PDF_MAIN_HIDE_SECOND_TAX')) {
-				if ($object->lines[$i]->total_localtax1 != 0) {
+				if (price2num($object->lines[$i]->localtax1_tx)) {
 					if (preg_replace('/[\s0%]/', '', $tmpresult)) {
 						$tmpresult .= '/';
 					} else {
@@ -2017,7 +2025,7 @@ function pdf_getlinevatrate($object, $i, $outputlangs, $hidedetails = 0)
 				}
 			}
 			if (!getDolGlobalString('MAIN_PDF_MAIN_HIDE_THIRD_TAX')) {
-				if ($object->lines[$i]->total_localtax2 != 0) {
+				if (price2num($object->lines[$i]->localtax2_tx)) {
 					if (preg_replace('/[\s0%]/', '', $tmpresult)) {
 						$tmpresult .= '/';
 					} else {
@@ -2290,7 +2298,7 @@ function pdf_getlineqty_keeptoship($object, $i, $outputlangs, $hidedetails = 0)
  */
 function pdf_getlineunit($object, $i, $outputlangs, $hidedetails = 0)
 {
-	global $hookmanager, $langs;
+	global $hookmanager;
 
 	$reshook = 0;
 	$result = '';
@@ -2315,7 +2323,7 @@ function pdf_getlineunit($object, $i, $outputlangs, $hidedetails = 0)
 	}
 	if (empty($reshook)) {
 		if (empty($hidedetails) || $hidedetails > 1) {
-			$result .= $langs->transnoentitiesnoconv($object->lines[$i]->getLabelOfUnit('short'));
+			$result .= $object->lines[$i]->getLabelOfUnit('short', $outputlangs, 1);
 		}
 	}
 	return $result;

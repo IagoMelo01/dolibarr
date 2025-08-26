@@ -477,7 +477,7 @@ if ($mode == 'show_day') {
 	$picto = 'calendarday';
 }
 if (empty($conf->dol_optimize_smallscreen)) {
-	$nav .= ' &nbsp; <a href="?year='.$nowyear.'&month='.$nowmonth.'&day='.$nowday.$param.'" class="datenowlink">'.$langs->trans("Today").'</a> ';
+	$nav .= ' <a href="?year='.$nowyear.'&month='.$nowmonth.'&day='.$nowday.$param.'" class="datenowlink marginleftonly marginrightonly">'.$langs->trans("Today").'</a> ';
 }
 $nav .= '</div>';
 
@@ -581,7 +581,6 @@ if ($user->hasRight('agenda', 'myactions', 'create') || $user->hasRight('agenda'
 
 // Define the legend/list of calendard to show
 $s = '';
-$link = '';
 
 
 $showextcals = $listofextcals;
@@ -606,7 +605,7 @@ if (isModEnabled("bookcal")) {
 		while ($i < $num) {
 			$objp = $db->fetch_object($resql);
 			$label = !empty($objp->label) ? $objp->label : $objp->ref;
-			$bookcalcalendars["calendars"][] = array("id" => $objp->id_cal, "label" => $label);
+			$bookcalcalendars["calendars"][$objp->id_cal] = array("id" => $objp->id_cal, "label" => $label);
 			$bookcalcalendars["availabilitieslink"][$objp->rowid] = $objp->id_cal;
 			$i++;
 		}
@@ -726,14 +725,14 @@ if (!empty($conf->use_javascript_ajax)) {	// If javascript on
 	if (!preg_match('/showbirthday=/i', $newparam)) {
 		$newparam .= '&showbirthday=1';
 	}
-	$link = '<a href="'.$_SERVER['PHP_SELF'].'?'.dol_escape_htmltag($newparam);
-	$link .= '">';
+	$s = '<a href="'.$_SERVER['PHP_SELF'].'?'.dol_escape_htmltag($newparam);
+	$s .= '">';
 	if (empty($showbirthday)) {
-		$link .= $langs->trans("AgendaShowBirthdayEvents");
+		$s .= $langs->trans("AgendaShowBirthdayEvents");
 	} else {
-		$link .= $langs->trans("AgendaHideBirthdayEvents");
+		$s .= $langs->trans("AgendaHideBirthdayEvents");
 	}
-	$link .= '</a>';
+	$s .= '</a>';
 }
 
 
@@ -761,10 +760,7 @@ $reshook = $hookmanager->executeHooks('printFieldListSelect', $parameters); // N
 $sql .= $hookmanager->resPrint;
 
 $sql .= ' FROM '.MAIN_DB_PREFIX.'c_actioncomm as ca, '.MAIN_DB_PREFIX."actioncomm as a";
-// We must filter on resource table
-if ($resourceid > 0) {
-	$sql .= ", ".MAIN_DB_PREFIX."element_resources as r";
-}
+
 // We must filter on assignment table
 if ($filtert > 0 || $usergroup > 0) {
 	$sql .= " INNER JOIN ".MAIN_DB_PREFIX."actioncomm_resources as ar";
@@ -775,6 +771,10 @@ if ($filtert > 0 || $usergroup > 0) {
 	if ($usergroup > 0) {
 		$sql .= " INNER JOIN ".MAIN_DB_PREFIX."usergroup_user as ugu ON ugu.fk_user = ar.fk_element AND ugu.fk_usergroup = ".((int) $usergroup);
 	}
+}
+// We must filter on resource table
+if ($resourceid > 0) {
+	$sql .= ", ".MAIN_DB_PREFIX."element_resources as r";
 }
 $sql .= ' WHERE a.fk_action = ca.id';
 $sql .= ' AND a.entity IN ('.getEntity('agenda').')';	// bookcal is a "virtual view" of agenda
@@ -2237,7 +2237,7 @@ function show_day_events($db, $day, $month, $year, $monthshown, $style, &$eventa
 								$listofusertoshow .= $cacheusers[$tmpid]->getNomUrl(-3, '', 0, 0, 0, 0, '', 'valignmiddle inline-block');
 							}
 
-							if ($event->type_code != 'BIRTHDAY') {
+							if ($event->type_code != 'BIRTHDAY' && $event->type_code != 'HOLIDAY') {
 								print $titletoshow;
 								print $listofusertoshow.' &nbsp;';
 							}
@@ -2297,7 +2297,7 @@ function show_day_events($db, $day, $month, $year, $monthshown, $style, &$eventa
 						// It's holiday calendar
 						$tmpholiday->fetch($event->id);
 
-						//print $tmpholiday->getNomUrl(1, -1, 0, 'valignmiddle inline-block');
+						print $tmpholiday->getNomUrl(1, -1, 0, 'valignmiddle inline-block');
 
 						$tmpid = $tmpholiday->fk_user;
 						if (empty($cacheusers[$tmpid])) {

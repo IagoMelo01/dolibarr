@@ -33,6 +33,7 @@
 
 // $permissiontoread, $permissiontoadd, $permissiontodelete, $permissiontoclose may be defined
 // $uploaddir may be defined (example to $conf->project->dir_output."/";)
+// $hidedetails, $hidedesc, $hideref and $moreparams may have been set or not.
 // $toselect may be defined
 // $diroutputmassaction may be defined
 // $confirm
@@ -778,7 +779,7 @@ if (!$error && $massaction == 'cancelorders') {
 			continue;
 		}
 
-		if ($cmd->statut != Commande::STATUS_VALIDATED) {
+		if ($cmd->status != Commande::STATUS_VALIDATED) {
 			$langs->load('errors');
 			setEventMessages($langs->trans("ErrorObjectMustHaveStatusValidToBeCanceled", $cmd->ref), null, 'errors');
 			$error++;
@@ -961,10 +962,10 @@ if (!$error && $massaction == "builddoc" && $permissiontoread && !GETPOST('butto
 				$filename .= '_'.strtolower(dol_sanitizeFileName($langs->transnoentities("Unpaid")));
 			}
 		}
-		if ($year) {
+		if (!empty($year)) {
 			$filename .= '_'.$year;
 		}
-		if ($month) {
+		if (!empty($month)) {
 			$filename .= '_'.$month;
 		}
 		if ($pagecount) {
@@ -1080,11 +1081,12 @@ if (!$error && $massaction == 'validate' && $permissiontoadd) {
 						}
 						$model = $objecttmp->model_pdf;
 						$ret = $objecttmp->fetch($objecttmp->id); // Reload to get new records
+
 						// To be sure vars is defined
-						$hidedetails = !empty($hidedetails) ? $hidedetails : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS') ? 1 : 0);
-						$hidedesc = !empty($hidedesc) ? $hidedesc : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_DESC') ? 1 : 0);
-						$hideref = !empty($hideref) ? $hideref : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_REF') ? 1 : 0);
-						$moreparams = !empty($moreparams) ? $moreparams : null;
+						$hidedetails = isset($hidedetails) ? $hidedetails : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS') ? 1 : 0);
+						$hidedesc = isset($hidedesc) ? $hidedesc : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_DESC') ? 1 : 0);
+						$hideref = isset($hideref) ? $hideref : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_REF') ? 1 : 0);
+						$moreparams = isset($moreparams) ? $moreparams : null;
 
 						$result = $objecttmp->generateDocument($model, $outputlangs, $hidedetails, $hidedesc, $hideref);
 						if ($result < 0) {
@@ -1244,18 +1246,10 @@ EOPHAN;
 			}
 
 			// To be sure vars is defined
-			if (empty($hidedetails)) {
-				$hidedetails = (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS') ? 1 : 0);
-			}
-			if (empty($hidedesc)) {
-				$hidedesc = (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_DESC') ? 1 : 0);
-			}
-			if (empty($hideref)) {
-				$hideref = (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_REF') ? 1 : 0);
-			}
-			if (empty($moreparams)) {
-				$moreparams = null;
-			}
+			$hidedetails = isset($hidedetails) ? $hidedetails : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS') ? 1 : 0);
+			$hidedesc = isset($hidedesc) ? $hidedesc : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_DESC') ? 1 : 0);
+			$hideref = isset($hideref) ? $hideref : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_REF') ? 1 : 0);
+			$moreparams = isset($moreparams) ? $moreparams : null;
 
 			$result = $objecttmp->generateDocument($objecttmp->model_pdf, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
 
@@ -1357,18 +1351,36 @@ if (!$error && ($action == 'updateprice' && $confirm == 'yes') && $permissiontoa
 				$result = $object->fetch($toselectid);
 				//var_dump($contcats);exit;
 				if ($result > 0) {
-					if ($obj->price_base_type == 'TTC') {
-						$newprice = $object->price_ttc * (100 + $pricepercentage) / 100;
-						$minprice = $object->price_min_ttc;
-					} else {
-						$newprice = $object->price * (100 + $pricepercentage) / 100;
-						$minprice = $object->price_min;
-					}
-					$res = $object->updatePrice($newprice, $obj->price_base_type, $user, $object->tva_tx, $minprice, 0, $object->tva_npr, 0, 0, array(), $object->default_vat_code);
-					if ($res > 0) {
-						$nbok++;
-					} else {
-						setEventMessages($object->error, $object->errors, 'errors');
+					if (getDolGlobalString('PRODUCT_PRICE_UNIQ')
+							|| getDolGlobalString('PRODUIT_CUSTOMER_PRICES')) {
+						if ($object->price_base_type == 'TTC') {
+							$newprice = $object->price_ttc * (100 + $pricepercentage) / 100;
+							$minprice = $object->price_min_ttc;
+						} else {
+							$newprice = $object->price * (100 + $pricepercentage) / 100;
+							$minprice = $object->price_min;
+						}
+						$res = $object->updatePrice($newprice, $object->price_base_type, $user, $object->tva_tx, $minprice, 0, $object->tva_npr, 0, 0, array(), $object->default_vat_code);
+						if ($res > 0) {
+							$nbok++;
+						} else {
+							setEventMessages($object->error, $object->errors, 'errors');
+						}
+					} elseif (getDolGlobalString('PRODUIT_MULTIPRICES')) {
+						$maxlevel = getDolGlobalInt('PRODUIT_MULTIPRICES_LIMIT');
+						for ($level = 1; $level <= $maxlevel; $level++) {
+							if ($object->price_base_type == 'TTC') {
+								$newprice = $object->multiprices_ttc[$level] * (100 + $pricepercentage) / 100;
+								$minprice = $object->multiprices_min_ttc[$level];
+							} else {
+								$newprice = $object->multiprices[$level] * (100 + $pricepercentage) / 100;
+								$minprice = $object->multiprices_min[$level];
+							}
+							$res = $object->updatePrice($newprice, $object->price_base_type, $user, $object->tva_tx, $minprice, $level, $object->tva_npr, 0, 0, array(), $object->default_vat_code);
+							if ($res > 0) {
+								$nbok++;
+							}
+						}
 					}
 				} else {
 					setEventMessages($object->error, $object->errors, 'errors');
@@ -1595,7 +1607,7 @@ if (!$error && $action == 'confirm_edit_value_extrafields' && $confirm == 'yes' 
 	}
 }
 
-if (!$error && ($massaction == 'affectcommercial' || ($action == 'affectcommercial' && $confirm == 'yes')) && $permissiontoadd) {
+if (!$error && ($massaction == 'assignsalerepresentative' || ($action == 'assignsalerepresentative' && $confirm == 'yes')) && $permissiontoadd) {
 	$db->begin();
 
 	$objecttmp = new $objectclass($db);
@@ -1694,6 +1706,8 @@ if (!$error && ($massaction == 'approveleave' || ($action == 'approveleave' && $
 
 				$objecttmp->date_valid = dol_now();
 				$objecttmp->fk_user_valid = $user->id;
+				$objecttmp->date_approval = dol_now();
+				$objecttmp->fk_user_approve = $user->id;
 				$objecttmp->status = Holiday::STATUS_APPROVED;
 				$objecttmp->statut = $objecttmp->status;	// deprecated
 

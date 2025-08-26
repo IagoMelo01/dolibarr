@@ -185,7 +185,6 @@ if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x'
 	$search_year = '';
 	$search_note = '';
 	$search_duration = '';
-	$search_value = '';
 	$search_date_startday = '';
 	$search_date_startmonth = '';
 	$search_date_startyear = '';
@@ -257,6 +256,7 @@ if ($action == 'addtimespent' && $user->hasRight('projet', 'time')) {
 					$object->timespent_withhour = 1;
 				} else {
 					$object->timespent_date = dol_mktime(12, 0, 0, GETPOSTINT("timemonth"), GETPOSTINT("timeday"), GETPOSTINT("timeyear"));
+					$object->timespent_withhour = 0;
 				}
 				$object->timespent_fk_user = GETPOSTINT("userid");
 				$object->timespent_fk_product = GETPOSTINT("fk_product");
@@ -282,6 +282,9 @@ if (($action == 'updateline' || $action == 'updatesplitline') && !$cancel && $us
 		$error++;
 	}
 
+	//If timespent date is not provided in POST (for eg, because in list the column date is hidden) we keep the actual date
+	$timespent_date = dol_mktime(12, 0, 0, GETPOSTINT("timelinemonth"), GETPOSTINT("timelineday"), GETPOSTINT("timelineyear"));
+
 	if (!$error) {
 		if (GETPOSTINT('taskid') != $id) {        // GETPOST('taskid') is id of new task
 			$id_temp = GETPOSTINT('taskid'); // should not overwrite $id
@@ -290,9 +293,6 @@ if (($action == 'updateline' || $action == 'updatesplitline') && !$cancel && $us
 			$object->fetchTimeSpent(GETPOSTINT('lineid'));
 
 			$result = 0;
-			if (in_array($object->timespent_fk_user, $childids) || $user->hasRight('projet', 'all', 'creer')) {
-				$result = $object->delTimeSpent($user);
-			}
 
 			$object->fetch($id_temp, $ref);
 
@@ -300,11 +300,12 @@ if (($action == 'updateline' || $action == 'updatesplitline') && !$cancel && $us
 			$object->timespent_old_duration = GETPOSTINT("old_duration");
 			$object->timespent_duration = GETPOSTINT("new_durationhour") * 60 * 60; // We store duration in seconds
 			$object->timespent_duration += (GETPOSTINT("new_durationmin") ? GETPOSTINT('new_durationmin') : 0) * 60; // We store duration in seconds
-			if (GETPOST("timelinehour") != '' && GETPOST("timelinehour") >= 0) {    // If hour was entered
+			if (GETPOST("timelinehour") != '' && GETPOST("timelinehour") >= 0 && !empty($timespent_date)) {    // If hour was entered
 				$object->timespent_date = dol_mktime(GETPOSTINT("timelinehour"), GETPOSTINT("timelinemin"), 0, GETPOSTINT("timelinemonth"), GETPOSTINT("timelineday"), GETPOSTINT("timelineyear"));
 				$object->timespent_withhour = 1;
-			} else {
-				$object->timespent_date = dol_mktime(12, 0, 0, GETPOSTINT("timelinemonth"), GETPOSTINT("timelineday"), GETPOSTINT("timelineyear"));
+			} elseif (!empty($timespent_date)) {
+				$object->timespent_date = $timespent_date;
+				$object->timespent_withhour = 0;
 			}
 			$object->timespent_fk_user = GETPOSTINT("userid_line");
 			$object->timespent_fk_product = GETPOSTINT("fk_product");
@@ -313,7 +314,7 @@ if (($action == 'updateline' || $action == 'updatesplitline') && !$cancel && $us
 
 			$result = 0;
 			if (in_array($object->timespent_fk_user, $childids) || $user->hasRight('projet', 'all', 'creer')) {
-				$result = $object->addTimeSpent($user);
+				$result = $object->updateTimeSpent($user);
 				if ($result >= 0) {
 					setEventMessages($langs->trans("RecordSaved"), null, 'mesgs');
 				} else {
@@ -324,7 +325,8 @@ if (($action == 'updateline' || $action == 'updatesplitline') && !$cancel && $us
 		} else {
 			$object->fetch($id, $ref);
 
-			$object->timespent_id = GETPOSTINT("lineid");
+			$object->fetchTimeSpent(GETPOSTINT('lineid'));
+
 			$object->timespent_note = GETPOST("timespent_note_line", "alphanohtml");
 			$object->timespent_old_duration = GETPOSTINT("old_duration");
 			$object->timespent_duration = GETPOSTINT("new_durationhour") * 60 * 60; // We store duration in seconds
@@ -332,8 +334,9 @@ if (($action == 'updateline' || $action == 'updatesplitline') && !$cancel && $us
 			if (GETPOST("timelinehour") != '' && GETPOST("timelinehour") >= 0) {    // If hour was entered
 				$object->timespent_date = dol_mktime(GETPOSTINT("timelinehour"), GETPOSTINT("timelinemin"), 0, GETPOSTINT("timelinemonth"), GETPOSTINT("timelineday"), GETPOSTINT("timelineyear"));
 				$object->timespent_withhour = 1;
-			} else {
-				$object->timespent_date = dol_mktime(12, 0, 0, GETPOSTINT("timelinemonth"), GETPOSTINT("timelineday"), GETPOSTINT("timelineyear"));
+			} elseif (!empty($timespent_date)) {
+				$object->timespent_date = $timespent_date;
+				$object->timespent_withhour = 0;
 			}
 			$object->timespent_fk_user = GETPOSTINT("userid_line");
 			$object->timespent_fk_product = GETPOSTINT("fk_product");
@@ -1002,17 +1005,6 @@ if (($id > 0 || !empty($ref)) || $projectidforalltimes > 0 || $allprojectforuser
 				print '</td></tr>';
 			}
 
-			// Visibility
-			print '<tr><td class="titlefield">' . $langs->trans("Visibility") . '</td><td>';
-			if ($projectstatic->public) {
-				print img_picto($langs->trans('SharedProject'), 'world', 'class="paddingrightonly"');
-				print $langs->trans('SharedProject');
-			} else {
-				print img_picto($langs->trans('PrivateProject'), 'private', 'class="paddingrightonly"');
-				print $langs->trans('PrivateProject');
-			}
-			print '</td></tr>';
-
 			// Budget
 			print '<tr><td>' . $langs->trans("Budget") . '</td><td>';
 			if (!is_null($projectstatic->budget_amount) && strcmp($projectstatic->budget_amount, '')) {
@@ -1032,6 +1024,17 @@ if (($id > 0 || !empty($ref)) || $projectidforalltimes > 0 || $allprojectforuser
 			}
 			print '</td></tr>';
 
+			// Visibility
+			print '<tr><td class="titlefield">' . $langs->trans("Visibility") . '</td><td>';
+			if ($projectstatic->public) {
+				print img_picto($langs->trans('SharedProject'), 'world', 'class="paddingrightonly"');
+				print $langs->trans('SharedProject');
+			} else {
+				print img_picto($langs->trans('PrivateProject'), 'private', 'class="paddingrightonly"');
+				print $langs->trans('PrivateProject');
+			}
+			print '</td></tr>';
+
 			// Other attributes
 			$cols = 2;
 			$savobject = $object;
@@ -1047,16 +1050,21 @@ if (($id > 0 || !empty($ref)) || $projectidforalltimes > 0 || $allprojectforuser
 
 			print '<table class="border tableforfield centpercent">';
 
-			// Description
-			print '<td class="titlefield tdtop">'.$langs->trans("Description").'</td><td>';
-			print dol_htmlentitiesbr($projectstatic->description);
-			print '</td></tr>';
-
 			// Categories
 			if (isModEnabled('category')) {
 				print '<tr><td class="valignmiddle">' . $langs->trans("Categories") . '</td><td>';
 				print $form->showCategories($projectstatic->id, 'project', 1);
 				print "</td></tr>";
+			}
+
+			// Description
+			print '<tr><td class="titlefield'.($projectstatic->description ? ' noborderbottom' : '').'" colspan="2">'.$langs->trans("Description").'</td></tr>';
+			if ($projectstatic->description) {
+				print '<tr><td class="nottitleforfield" colspan="2">';
+				print '<div class="longmessagecut">';
+				print dolPrintHTML($projectstatic->description);
+				print '</div>';
+				print '</td></tr>';
 			}
 
 			print '</table>';
@@ -1619,7 +1627,7 @@ if (($id > 0 || !empty($ref)) || $projectidforalltimes > 0 || $allprojectforuser
 			$sql .= " AND pt.fk_projet IN (" . $db->sanitize($projectidforalltimes) . ")";
 		} elseif (!empty($allprojectforuser)) {
 			// Limit on on user
-			if (empty($search_user)) {
+			if (empty($search_user) && !empty($arrayfields['author']['checked'])) {
 				$search_user = $user->id;
 			}
 			if ($search_user > 0) {

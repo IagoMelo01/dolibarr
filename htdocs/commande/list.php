@@ -766,14 +766,16 @@ if (empty($reshook)) {
 		}
 	}
 }
+
 if ($action == 'validate' && $permissiontoadd && $objectclass !== null) {
 	if (GETPOST('confirm') == 'yes') {
+		/** @var Commande $objecttmp */
 		$objecttmp = new $objectclass($db);
 		$db->begin();
 		$error = 0;
 		foreach ($toselect as $checked) {
 			if ($objecttmp->fetch($checked)) {
-				if ($objecttmp->statut == 0) {
+				if ($objecttmp->status == $objecttmp::STATUS_DRAFT) {
 					if (!empty($objecttmp->fk_warehouse)) {
 						$idwarehouse = $objecttmp->fk_warehouse;
 					} else {
@@ -804,21 +806,23 @@ if ($action == 'validate' && $permissiontoadd && $objectclass !== null) {
 }
 if ($action == 'shipped' && $permissiontoadd && $objectclass !== null) {
 	if (GETPOST('confirm') == 'yes') {
+		/** @var Commande $objecttmp */
 		$objecttmp = new $objectclass($db);
 		$db->begin();
 		$error = 0;
 		foreach ($toselect as $checked) {
 			if ($objecttmp->fetch($checked)) {
-				if ($objecttmp->statut == 1 || $objecttmp->statut == 2) {
-					if ($objecttmp->cloture($user)) {
+				if ($objecttmp->status == $objecttmp::STATUS_VALIDATED || $objecttmp->status == $objecttmp::STATUS_SHIPMENTONPROCESS || $objecttmp->status == $objecttmp::STATUS_CLOSED) {
+					$result = $objecttmp->cloture($user);
+					if ($result > 0) {
 						setEventMessages($langs->trans('StatusOrderDelivered', $objecttmp->ref), null, 'mesgs');
-					} else {
+					} elseif ($result < 0) {
 						setEventMessages($langs->trans('ErrorOrderStatusCantBeSetToDelivered'), null, 'errors');
 						$error++;
 					}
 				} else {
 					$langs->load("errors");
-					setEventMessages($langs->trans('ErrorIsNotADraft', $objecttmp->ref), null, 'errors');
+					setEventMessages($langs->trans('ErrorObjectHasWrongStatus', $objecttmp->ref), null, 'errors');
 					$error++;
 				}
 			} else {
@@ -997,7 +1001,12 @@ if ($search_status != '') {
 	}
 }
 if ($search_option == 'late') {
-	$sql .= " AND c.date_commande < '".$db->idate(dol_now() - $conf->commande->client->warning_delay)."'";
+	// Use delivery date if set and not disabled, otherwise use order date.
+	if (!getDolGlobalString('ORDER_DISABLE_DELIVERY_DATE')) {
+		$sql .= " AND ((c.date_livraison IS NOT NULL AND c.date_livraison < '".$db->idate(dol_now() - $conf->order->client->warning_delay)."') OR (c.date_livraison IS NULL AND c.date_commande < '".$db->idate(dol_now() - $conf->order->client->warning_delay)."'))";
+	} else {
+		$sql .= " AND c.date_commande < '".$db->idate(dol_now() - $conf->order->client->warning_delay)."'";
+	}
 }
 if ($search_datecloture_start) {
 	$sql .= " AND c.date_cloture >= '".$db->idate($search_datecloture_start)."'";

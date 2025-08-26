@@ -1072,10 +1072,12 @@ class FactureFournisseur extends CommonInvoice
 
 					$line->id               = $obj->rowid;
 					$line->rowid            = $obj->rowid;
+
 					$line->description      = $obj->line_desc;
 					$line->desc             = $obj->line_desc;
-					$line->date_start       = $obj->date_start;
-					$line->date_end         = $obj->date_end;
+					$line->date_start       = $this->db->jdate($obj->date_start);
+					$line->date_end         = $this->db->jdate($obj->date_end);
+
 					$line->product_ref      = $obj->product_ref;
 					$line->ref              = $obj->product_ref;
 					$line->ref_supplier		= $obj->ref_supplier;
@@ -2303,19 +2305,25 @@ class FactureFournisseur extends CommonInvoice
 
 			$result = $supplierinvoiceline->insert($notrigger);
 			if ($result > 0) {
-				// Reorder if child line
-				if (!empty($fk_parent_line)) {
-					$this->line_order(true, 'DESC');
-				} elseif ($rang > 0 && $rang <= count($this->lines)) { // Update all rank of all other lines
-					$linecount = count($this->lines);
-					for ($ii = $rang; $ii <= $linecount; $ii++) {
-						$this->updateRangOfLine($this->lines[$ii - 1]->id, $ii + 1);
-					}
-				}
-
-				// Mise a jour information denormalisees au niveau de la facture meme
+				// Update denormalized fields at the order level
 				$result = $this->update_price(1, 'auto', 0, $this->thirdparty); // The addline method is designed to add line from user input so total calculation with update_price must be done using 'auto' mode.
+
 				if ($result > 0) {
+					if (!isset($this->context['createfromclone'])) {
+						if (!empty($fk_parent_line)) {
+							// Always reorder if child line
+							$this->line_order(true, 'DESC');
+						} elseif ($rang > 0 && $rang <= count($this->lines)) {
+							// Update all rank of all other lines starting from the same $ranktouse
+							$linecount = count($this->lines);
+							for ($ii = $rang; $ii <= $linecount; $ii++) {
+								$this->updateRangOfLine($this->lines[$ii - 1]->id, $ii + 1);
+							}
+						}
+
+						$this->lines[] = $supplierinvoiceline;
+					}
+
 					$this->db->commit();
 					return $supplierinvoiceline->id;
 				} else {
@@ -2502,6 +2510,7 @@ class FactureFournisseur extends CommonInvoice
 
 		if ($res < 1) {
 			$this->errors[] = $line->error;
+			$this->errors = array_merge($this->errors, $line->errors);
 		} else {
 			// Update total price into invoice record
 			$res = $this->update_price('1', 'auto', 0, $this->thirdparty);

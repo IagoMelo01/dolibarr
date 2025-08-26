@@ -52,8 +52,10 @@ function versiontostring($versionarray)
 }
 
 /**
- *	Compare 2 versions (stored into 2 arrays).
- *  To check if Dolibarr version is lower than (x,y,z), do "if versioncompare(versiondolibarrarray(), array(x.y.z)) <= 0"
+ *	Compare 2 versions (stored into 2 arrays), to know if a version (a,b,c) is lower than (x,y,z)
+ *  To check using a string version do a preg_split('/[\.\-]/', strinversion) to convert the string into an array.
+ *  To check with Dolibarr version use versiondolibarrarray() to get the array of Dolibarr current version
+ *
  *  For example: if (versioncompare(versiondolibarrarray(),array(4,0,-5)) >= 0) is true if version is 4.0 alpha or higher.
  *  For example: if (versioncompare(versiondolibarrarray(),array(4,0,0)) >= 0) is true if version is 4.0 final or higher.
  *  For example: if (versioncompare(versiondolibarrarray(),array(4,0,1)) >= 0) is true if version is 4.0.1 or higher.
@@ -61,9 +63,9 @@ function versiontostring($versionarray)
  *
  *	@param      array<int|string>	$versionarray1	Array of version (vermajor,verminor,patch)
  *	@param      array<int|string>	$versionarray2	Array of version (vermajor,verminor,patch)
- *	@return     int<-4,4>			      	-4,-3,-2,-1 if versionarray1<versionarray2 (value depends on level of difference)
- * 												0 if same
- * 												1,2,3,4 if versionarray1>versionarray2 (value depends on level of difference)
+ *	@return     int<-4,4>			      			-4,-3,-2,-1 if versionarray1<versionarray2 (value depends on level of difference)
+ * 													0 if same
+ * 													1,2,3,4 if versionarray1>versionarray2 (value depends on level of difference)
  *  @see versiontostring()
  */
 function versioncompare($versionarray1, $versionarray2)
@@ -118,7 +120,7 @@ function versioncompare($versionarray1, $versionarray2)
 		}
 	}
 	//print join('.',$versionarray1).'('.count($versionarray1).') / '.join('.',$versionarray2).'('.count($versionarray2).') => '.$ret.'<br>'."\n";
-	return $ret;
+	return $ret;	// return level=1 if difference is on the main version, level=2 on minor version, level=3 on maintenance version, level=4 on development phase version
 }
 
 
@@ -136,12 +138,12 @@ function versionphparray()
 /**
  *	Return version Dolibarr
  *
- *	@return     array<int<0,2>,string>	Tableau de version (vermajeur,vermineur,autre)
+ *	@return     array<int<0,2>,string>	Array of version (vermajor,verminor,vermaintenance,other)
  *  @see versioncompare()
  */
 function versiondolibarrarray()
 {
-	return explode('.', DOL_VERSION);
+	return preg_split('/[\-\.]/', DOL_VERSION);
 }
 
 
@@ -242,7 +244,7 @@ function run_sql($sqlfile, $silent = 1, $entity = 0, $usesavepoint = 1, $handler
 			// Add line buf to buffer if not a comment
 			if ($nocommentremoval || !preg_match('/^\s*--/', $buf)) {
 				if (empty($nocommentremoval)) {
-					$buf = preg_replace('/([,;ERLT\)])\s*--.*$/i', '\1', $buf); //remove comment from a line that not start with -- before add it to the buffer
+					$buf = preg_replace('/([,;ERLT0\)])\s+--.*$/i', '\1', $buf); //remove comment on lines that does not start with --, before adding it to the buffer
 				}
 				if ($buffer) {
 					$buffer .= ' ';
@@ -1720,8 +1722,8 @@ function complete_elementList_with_modules(&$elementList)
 /**
  *	Show array with constants to edit
  *
- *	@param	array<string,array{type:string,label:string}>|array<int,string>	$tableau		Array of constants array('key'=>array('type'=>type, 'label'=>label)
- *                                                                                          where type can be 'string', 'text', 'textarea', 'html', 'yesno', 'emailtemplate:xxx', ...
+ *	@param	array<string,array{type:string,label:string,tooltip?:string}>|array<int,string>	$tableau		Array of constants array('key'=>array('type'=>type, 'label'=>label, 'tooltip'=>tooltip)
+ *                                                                                          				where type can be 'string', 'text', 'textarea', 'html', 'yesno', 'emailtemplate:xxx', ...
  *	@param	int<2,3>	$strictw3c		0=Include form into table (deprecated), 1=Form is outside table to respect W3C (deprecated), 2=No form nor button at all, 3=No form nor button at all and each field has a unique name (form is output by caller, recommended)  (typed as int<2,3> to highlight the deprecated values)
  *  @param  string  	$helptext       Tooltip help to use for the column name of values
  *  @param	string		$text			Text to use for the column name of values
@@ -1901,6 +1903,8 @@ function form_constantes($tableau, $strictw3c = 2, $helptext = '', $text = 'Valu
 					//var_dump($arraydefaultmessage);
 					//var_dump($arrayofmessagename);
 					print $form->selectarray('constvalue'.(empty($strictw3c) ? '' : ($strictw3c == 3 ? '_'.$const : '[]')), $arrayofmessagename, $obj->value.':'.$tmp[1], 'None', 0, 0, '', 0, 0, 0, '', '', 1);
+
+					print '<a href="'.DOL_URL_ROOT.'/admin/mails_templates.php?action=create&type_template='.urlencode($tmp[1]).'&backtopage='.urlencode($_SERVER["PHP_SELF"]).'">'.img_picto('', 'add').'</a>';
 				} elseif (preg_match('/MAIL_FROM$/i', $const)) {
 					print img_picto('', 'email', 'class="pictofixedwidth"').'<input type="text" class="flat minwidth300" name="constvalue'.(empty($strictw3c) ? '' : ($strictw3c == 3 ? '_'.$const : '[]')).'" value="'.dol_escape_htmltag($obj->value).'">';
 				} else { // type = 'string' ou 'chaine'
@@ -1941,9 +1945,9 @@ function form_constantes($tableau, $strictw3c = 2, $helptext = '', $text = 'Valu
  */
 function showModulesExludedForExternal($modules)
 {
-	global $conf, $langs;
+	global $langs;
 
-	$text = $langs->trans("OnlyFollowingModulesAreOpenedToExternalUsers");
+	$text = $langs->transnoentitiesnoconv("OnlyFollowingModulesAreOpenedToExternalUsers");
 	$listofmodules = explode(',', getDolGlobalString('MAIN_MODULES_FOR_EXTERNAL'));	// List of modules qualified for external user management
 
 	$i = 0;
@@ -1967,11 +1971,11 @@ function showModulesExludedForExternal($modules)
 			}
 			$i++;
 
-			$tmptext = $langs->trans('Module'.$module->numero.'Name');
+			$tmptext = $langs->transnoentitiesnoconv('Module'.$module->numero.'Name');
 			if ($tmptext != 'Module'.$module->numero.'Name') {
-				$text .= $langs->trans('Module'.$module->numero.'Name');
+				$text .= $langs->transnoentitiesnoconv('Module'.$module->numero.'Name');
 			} else {
-				$text .= $langs->trans($module->name);
+				$text .= $langs->transnoentitiesnoconv($module->name);
 			}
 		}
 	}

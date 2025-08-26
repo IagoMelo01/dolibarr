@@ -376,10 +376,10 @@ $positiverates = '';
 if (price2num($line->tva_tx)) {
 	$positiverates .= ($positiverates ? '/' : '').price2num($line->tva_tx);
 }
-if (price2num($line->total_localtax1)) {
+if (price2num($line->localtax1_tx)) {
 	$positiverates .= ($positiverates ? '/' : '').price2num($line->localtax1_tx);
 }
-if (price2num($line->total_localtax2)) {
+if (price2num($line->localtax2_tx)) {
 	$positiverates .= ($positiverates ? '/' : '').price2num($line->localtax2_tx);
 }
 if (empty($positiverates)) {
@@ -421,10 +421,8 @@ print '</td>';
 
 if (getDolGlobalString('PRODUCT_USE_UNITS')) {
 	print '<td class="linecoluseunit nowrap left">';
-	$label = $line->getLabelOfUnit('short');
-	if ($label !== '') {
-		print $langs->trans($label);
-	}
+	$label = $line->getLabelOfUnit('short', $langs);
+	print $label;
 	print '</td>';
 }
 if (!empty($line->remise_percent) && $line->special_code != 3) {

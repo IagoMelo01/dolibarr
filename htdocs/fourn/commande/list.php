@@ -1773,6 +1773,7 @@ if ($resql) {
 		$objectstatic->note_public = $obj->note_public;
 		$objectstatic->note_private = $obj->note_private;
 		$objectstatic->statut = $obj->fk_statut;
+		$objectstatic->status = $obj->fk_statut;
 
 		if ($mode == 'kanban') {
 			if ($i == 0) {
@@ -2063,7 +2064,11 @@ if ($resql) {
 			}
 			// Billed
 			if (!empty($arrayfields['cf.billed']['checked'])) {
-				print '<td class="center">'.yn($obj->billed).'</td>';
+				print '<td class="center">';
+				if ($obj->billed) {
+					print yn($obj->billed, $langs->trans("Billed"));
+				}
+				print '</td>';
 				if (!$i) {
 					$totalarray['nbfield']++;
 				}

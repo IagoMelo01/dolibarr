@@ -2394,7 +2394,7 @@ if ($id > 0) {
 								} elseif ($valuetoshow == 2) {
 									$valuetoshow = $langs->trans('CurrentNext');
 								}
-								$class = "center";
+								$class = "center tdoverflowmax125";
 							} elseif ($value == 'price' || preg_match('/^amount/i', $value)) {
 								$valuetoshow = price($valuetoshow);
 							}
@@ -2406,6 +2406,8 @@ if ($id > 0) {
 								$key = $langs->trans("PaymentCondition".strtoupper($obj->code));
 								$valuetoshow = ($obj->code && $key != "PaymentCondition".strtoupper($obj->code) ? $key : $obj->$value);
 								$valuetoshow = nl2br($valuetoshow);
+								$titletoshow = $valuetoshow;
+								$class = 'small tdoverflowmax200';
 							} elseif ($value == 'label' && $tabname[$id] == 'c_country') {
 								$key = $langs->trans("Country".strtoupper($obj->code));
 								$valuetoshow = ($obj->code && $key != "Country".strtoupper($obj->code) ? $key : $obj->$value);
@@ -2433,6 +2435,8 @@ if ($id > 0) {
 							} elseif ($value == 'libelle' && $tabname[$id] == 'c_payment_term') {
 								$key = $langs->trans("PaymentConditionShort".strtoupper($obj->code));
 								$valuetoshow = ($obj->code && $key != "PaymentConditionShort".strtoupper($obj->code) ? $key : $obj->$value);
+								$titletoshow = $key;
+								$class = "tdoverflowmax150";
 							} elseif ($value == 'libelle' && $tabname[$id] == 'c_paiement') {
 								$transavailableforcode = $langs->tab_translate["PaymentType".strtoupper($obj->code)];
 								$key = $langs->trans("PaymentType".strtoupper($obj->code));
@@ -2539,7 +2543,7 @@ if ($id > 0) {
 							} elseif ($value == 'block_if_negative') {
 								$valuetoshow = yn($obj->{$value});
 							} elseif ($value == 'icon') {
-								$valuetoshow = $obj->{$value}." ".img_picto("", $obj->{$value});
+								$valuetoshow = $obj->{$value}." ".img_picto("", preg_replace('/^fa-/', '', $obj->{$value}));
 							} elseif ($value == 'type_duration') {
 								$TDurationTypes = array('y' => $langs->trans('Years'), 'm' => $langs->trans('Month'), 'w' => $langs->trans('Weeks'), 'd' => $langs->trans('Days'), 'h' => $langs->trans('Hours'), 'i' => $langs->trans('Minutes'));
 								if (!empty($obj->{$value}) && array_key_exists($obj->{$value}, $TDurationTypes)) {
@@ -2560,7 +2564,7 @@ if ($id > 0) {
 							if (in_array($value, array('nbjour', 'decalage', 'pos', 'position', 'deposit_percent'))) {
 								$class .= ' right';
 							}
-							if (in_array($value, array('type_vat', 'localtax1_type', 'localtax2_type'))) {
+							if (in_array($value, array('icon', 'type_vat', 'localtax1_type', 'localtax2_type'))) {
 								$class .= ' nowraponall';
 							}
 							if (in_array($value, array('use_default', 'fk_parent', 'sortorder'))) {
@@ -2578,7 +2582,7 @@ if ($id > 0) {
 						// Favorite & EEC
 						// Only for country dictionary
 						if ($id == DICT_COUNTRY) {
-							print '<td class="nowrap center">';
+							print '<td class="nowraponall center">';
 							// Is in EEC
 							if ($iserasable) {
 								print '<a class="reposition" href="'.$url.'action='.$acts[$obj->eec].'_eec&token='.newToken().'">'.$actl[$obj->eec].'</a>';
@@ -2586,7 +2590,7 @@ if ($id > 0) {
 								print '<span class="opacitymedium">'.$langs->trans("AlwaysActive").'</span>';
 							}
 							print '</td>';
-							print '<td class="nowrap center">';
+							print '<td class="nowraponall center">';
 							// Favorite
 							if ($iserasable) {
 								print '<a class="reposition" href="'.$url.'action='.$acts[$obj->favorite].'_favorite&token='.newToken().'">'.$actl[$obj->favorite].'</a>';
@@ -2598,7 +2602,7 @@ if ($id > 0) {
 					}
 
 					// Active
-					print '<td class="nowrap center">';
+					print '<td class="nowraponall center">';
 					if ($canbedisabled) {
 						print '<a class="reposition" href="'.$url.'action='.$acts[$obj->active].'&token='.newToken().'">'.$actl[$obj->active].'</a>';
 					} else {
@@ -2912,7 +2916,7 @@ function dictFieldList($fieldlist, $obj = null, $tabname = '', $context = '')
 		} elseif ($value == 'type_vat') {
 			// VAT type 0: all, 1: sell, 2: purchase
 			print '<td class="center">';
-			print $form->selectarray($value, $type_vatList, (empty($obj->{$value}) ? '' : $obj->{$value}), 1);
+			print $form->selectarray($value, $type_vatList, (empty($obj->{$value}) ? '0' : $obj->{$value}));
 			print '</td>';
 		} elseif ($value == 'localtax1_type' || $value == 'localtax2_type') {
 			// Le type de taxe locale

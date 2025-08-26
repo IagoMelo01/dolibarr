@@ -7,6 +7,7 @@
  * Copyright (C) 2024       MDW                     <mdeweerd@users.noreply.github.com>
  * Copyright (C) 2024       Frédéric France         <frederic.france@free.fr>
  * Copyright (C) 2024       Alexandre Spangaro      <alexandre@inovea-conseil.com>
+ * Copyright (C) 2025		Benjamin Falière		<benjamin@faliere.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -548,14 +549,35 @@ if (empty($reshook)) {
 			// Load new object
 			$newobject = new Project($db);
 			$newobject->fetch($result);
-			$newobject->fetch_optionals();
-			$newobject->fetch_thirdparty(); // Load new object
-			$object = $newobject;
-			$action = 'view';
-			$comefromclone = true;
 
 			setEventMessages($langs->trans("ProjectCreatedInDolibarr", $newobject->ref), null, 'mesgs');
-			//var_dump($newobject); exit;
+
+			header('Location: '.$_SERVER['PHP_SELF'].'?id='.$result.'&action=edit&comefromclone=1');
+			exit;
+		}
+	}
+
+	// Quick edit for extrafields
+	if ($action == 'update_extras' && $permissiontoadd) {
+		$object->oldcopy = dol_clone($object, 2);
+
+		// Fill array 'array_options' with data from update form
+		$ret = $extrafields->setOptionalsFromPost(null, $object, GETPOST('attribute', 'restricthtml'));
+		if ($ret < 0) {
+			$error++;
+		}
+
+		if (!$error) {
+			// Actions on extra fields
+			$result = $object->insertExtraFields('PROJECT_MODIFY');
+			if ($result < 0) {
+				setEventMessages($object->error, $object->errors, 'errors');
+				$error++;
+			}
+		}
+
+		if ($error) {
+			$action = 'edit_extras';
 		}
 	}
 
@@ -791,7 +813,7 @@ if ($action == 'create' && $user->hasRight('projet', 'creer')) {
 			print $text;
 		}
 		if (!GETPOSTISSET('backtopage')) {
-			$url = '/societe/card.php?action=create&client=3&fournisseur=0&backtopage='.urlencode($_SERVER["PHP_SELF"].'?action=create');
+			$url = '/societe/card.php?action=create&customer=3&fournisseur=0&backtopage='.urlencode($_SERVER["PHP_SELF"].'?action=create');
 			$newbutton = '<span class="fa fa-plus-circle valignmiddle paddingleft" title="'.$langs->trans("AddThirdParty").'"></span>';
 			// TODO @LDR Implement this
 			if (getDolGlobalInt('MAIN_FEATURES_LEVEL') >= 2) {
@@ -811,31 +833,6 @@ if ($action == 'create' && $user->hasRight('projet', 'creer')) {
 		print $object->LibStatut($status, 4);
 		print '</td></tr>';
 	}
-
-	// Visibility
-	print '<tr><td>'.$langs->trans("Visibility").'</td><td class="maxwidthonsmartphone">';
-	$array = array();
-	if (!getDolGlobalString('PROJECT_DISABLE_PRIVATE_PROJECT')) {
-		$array[0] = $langs->trans("PrivateProject");
-	}
-	if (!getDolGlobalString('PROJECT_DISABLE_PUBLIC_PROJECT')) {
-		$array[1] = $langs->trans("SharedProject");
-	}
-
-	if (count($array) > 0) {
-		print $form->selectarray('public', $array, GETPOSTINT('public') ? 1 : 0, 0, 0, 0, '', 0, 0, 0, '', '', 1);
-	} else {
-		print '<input type="hidden" name="public" id="public" value="'.(GETPOSTINT('public') ? 1 : 0).'">';
-
-		if (GETPOSTINT('public') == 0) {
-			print img_picto($langs->trans('PrivateProject'), 'private', 'class="paddingrightonly"');
-			print $langs->trans("PrivateProject");
-		} else {
-			print img_picto($langs->trans('SharedProject'), 'world', 'class="paddingrightonly"');
-			print $langs->trans("SharedProject");
-		}
-	}
-	print '</td></tr>';
 
 	if (getDolGlobalString('PROJECT_USE_OPPORTUNITIES')) {
 		// Opportunity status
@@ -900,6 +897,31 @@ if ($action == 'create' && $user->hasRight('projet', 'creer')) {
 		print img_picto('', 'category', 'class="pictofixedwidth"').$form->multiselectarray('categories', $cate_arbo, $arrayselected, 0, 0, 'quatrevingtpercent widthcentpercentminusx', 0, 0);
 		print "</td></tr>";
 	}
+
+	// Visibility
+	print '<tr><td>'.$langs->trans("Visibility").'</td><td class="maxwidthonsmartphone">';
+	$array = array();
+	if (!getDolGlobalString('PROJECT_DISABLE_PRIVATE_PROJECT')) {
+		$array[0] = $langs->trans("PrivateProject");
+	}
+	if (!getDolGlobalString('PROJECT_DISABLE_PUBLIC_PROJECT')) {
+		$array[1] = $langs->trans("SharedProject");
+	}
+
+	if (count($array) > 0) {
+		print $form->selectarray('public', $array, GETPOSTINT('public') ? 1 : 0, 0, 0, 0, '', 0, 0, 0, '', '', 1);
+	} else {
+		print '<input type="hidden" name="public" id="public" value="'.(GETPOSTINT('public') ? 1 : 0).'">';
+
+		if (GETPOSTINT('public') == 0) {
+			print img_picto($langs->trans('PrivateProject'), 'private', 'class="paddingrightonly"');
+			print $langs->trans("PrivateProject");
+		} else {
+			print img_picto($langs->trans('SharedProject'), 'world', 'class="paddingrightonly"');
+			print $langs->trans("SharedProject");
+		}
+	}
+	print '</td></tr>';
 
 	// Selection of Owner contact type
 	print '<tr><td class="tdtop">'.$langs->trans("ProjectContactTypeManager").'</td>';
@@ -1210,31 +1232,6 @@ if ($action == 'create' && $user->hasRight('projet', 'creer')) {
 			print '</td></tr>';
 		}
 
-		// Visibility
-		print '<tr><td>'.$langs->trans("Visibility").'</td><td>';
-		$array = array();
-		if (!getDolGlobalString('PROJECT_DISABLE_PRIVATE_PROJECT')) {
-			$array[0] = $langs->trans("PrivateProject");
-		}
-		if (!getDolGlobalString('PROJECT_DISABLE_PUBLIC_PROJECT')) {
-			$array[1] = $langs->trans("SharedProject");
-		}
-
-		if (count($array) > 0) {
-			print $form->selectarray('public', $array, $object->public, 0, 0, 0, '', 0, 0, 0, '', '', 1);
-		} else {
-			print '<input type="hidden" id="public" name="public" value="'.$object->public.'">';
-
-			if ($object->public == 0) {
-				print img_picto($langs->trans('PrivateProject'), 'private', 'class="paddingrightonly"');
-				print $langs->trans("PrivateProject");
-			} else {
-				print img_picto($langs->trans('SharedProject'), 'world', 'class="paddingrightonly"');
-				print $langs->trans("SharedProject");
-			}
-		}
-		print '</td></tr>';
-
 		if (getDolGlobalString('PROJECT_USE_OPPORTUNITIES')) {
 			$classfortr = ($object->usage_opportunity ? '' : ' hideobject');
 			// Opportunity status
@@ -1321,6 +1318,31 @@ if ($action == 'create' && $user->hasRight('projet', 'creer')) {
 			print img_picto('', 'category', 'class="pictofixedwidth"').$form->multiselectarray('categories', $cate_arbo, $arrayselected, 0, 0, 'quatrevingtpercent widthcentpercentminusx', 0, '0');
 			print "</td></tr>";
 		}
+
+		// Visibility
+		print '<tr><td>'.$langs->trans("Visibility").'</td><td>';
+		$array = array();
+		if (!getDolGlobalString('PROJECT_DISABLE_PRIVATE_PROJECT')) {
+			$array[0] = $langs->trans("PrivateProject");
+		}
+		if (!getDolGlobalString('PROJECT_DISABLE_PUBLIC_PROJECT')) {
+			$array[1] = $langs->trans("SharedProject");
+		}
+
+		if (count($array) > 0) {
+			print $form->selectarray('public', $array, $object->public, 0, 0, 0, '', 0, 0, 0, '', '', 1);
+		} else {
+			print '<input type="hidden" id="public" name="public" value="'.$object->public.'">';
+
+			if ($object->public == 0) {
+				print img_picto($langs->trans('PrivateProject'), 'private', 'class="paddingrightonly"');
+				print $langs->trans("PrivateProject");
+			} else {
+				print img_picto($langs->trans('SharedProject'), 'world', 'class="paddingrightonly"');
+				print $langs->trans("SharedProject");
+			}
+		}
+		print '</td></tr>';
 
 		// Other options
 		$parameters = array();
@@ -1409,17 +1431,6 @@ if ($action == 'create' && $user->hasRight('projet', 'creer')) {
 			print '</td></tr>';
 		}
 
-		// Visibility
-		print '<tr><td class="titlefield">'.$langs->trans("Visibility").'</td><td>';
-		if ($object->public) {
-			print img_picto($langs->trans('SharedProject'), 'world', 'class="paddingrightonly"');
-			print $langs->trans('SharedProject');
-		} else {
-			print img_picto($langs->trans('PrivateProject'), 'private', 'class="paddingrightonly"');
-			print $langs->trans('PrivateProject');
-		}
-		print '</td></tr>';
-
 		if (getDolGlobalString('PROJECT_USE_OPPORTUNITIES') && !empty($object->usage_opportunity)) {
 			// Opportunity status
 			print '<tr><td>'.$langs->trans("OpportunityStatus");
@@ -1463,6 +1474,17 @@ if ($action == 'create' && $user->hasRight('projet', 'creer')) {
 		}
 		print '</td></tr>';
 
+		// Visibility
+		print '<tr><td class="titlefield">'.$langs->trans("Visibility").'</td><td>';
+		if ($object->public) {
+			print img_picto($langs->trans('SharedProject'), 'world', 'class="paddingrightonly"');
+			print $langs->trans('SharedProject');
+		} else {
+			print img_picto($langs->trans('PrivateProject'), 'private', 'class="paddingrightonly"');
+			print $langs->trans('PrivateProject');
+		}
+		print '</td></tr>';
+
 		// Other attributes
 		$cols = 2;
 		include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_view.tpl.php';
@@ -1475,18 +1497,21 @@ if ($action == 'create' && $user->hasRight('projet', 'creer')) {
 
 		print '<table class="border tableforfield centpercent">';
 
-		// Description
-		print '<td class="titlefield tdtop">'.$langs->trans("Description").'</td><td>';
-		print '<div class="longmessagecut">';
-		print dolPrintHTML($object->description);
-		print '</div>';
-		print '</td></tr>';
-
 		// Categories
 		if (isModEnabled('category')) {
 			print '<tr><td class="valignmiddle">'.$langs->trans("Categories").'</td><td>';
 			print $form->showCategories($object->id, Categorie::TYPE_PROJECT, 1);
 			print "</td></tr>";
+		}
+
+		// Description
+		print '<tr><td class="titlefield'.($object->description ? ' noborderbottom' : '').'" colspan="2">'.$langs->trans("Description").'</td></tr>';
+		if ($object->description) {
+			print '<tr><td class="nottitleforfield" colspan="2">';
+			print '<div class="longmessagecut">';
+			print dolPrintHTML($object->description);
+			print '</div>';
+			print '</td></tr>';
 		}
 
 		print '</table>';
@@ -1685,18 +1710,21 @@ if ($action == 'create' && $user->hasRight('projet', 'creer')) {
 
 			// Buttons Create
 			if (!getDolGlobalString('PROJECT_HIDE_CREATE_OBJECT_BUTTON')) {
+				// We check the type of thirdparty
+				$is_customer_or_prospect = (!empty($object->thirdparty->prospect) || !empty($object->thirdparty->client));
+				$is_supplier_only= (!empty($object->thirdparty->fournisseur) && !$is_customer_or_prospect);
+
 				$arrayforbutaction = array(
-					//1 => array('lang' => 'propal', 'enabled' => 1, 'perm' => 1, 'label' => 'XXX'),
-					10 => array('lang' => 'propal', 'enabled' => isModEnabled("propal"), 'perm' => $user->hasRight('propal', 'creer') ? true : false, 'label' => 'AddProp', 'url' => '/comm/propal/card.php?action=create&amp;projectid='.$object->id.'&amp;socid='.$object->socid),
-					20 => array('lang' => 'orders', 'enabled' => isModEnabled("order"), 'perm' => $user->hasRight('commande', 'creer') ? true : false, 'label' => 'CreateOrder', 'url' => '/commande/card.php?action=create&amp;projectid='.$object->id.'&amp;socid='.$object->socid),
-					30 => array('lang' => 'bills', 'enabled' => isModEnabled("invoice"), 'perm' => $user->hasRight('facture', 'creer') ? true : false, 'label' => 'CreateBill', 'url' => '/compta/facture/card.php?action=create&amp;projectid='.$object->id.'&amp;socid='.$object->socid),
-					40 => array('lang' => 'supplier_proposal', 'enabled' => isModEnabled("supplier_proposal"), 'perm' => $user->hasRight('supplier_proposal', 'creer') ? true : false, 'label' => 'AddSupplierProposal', 'url' => '/supplier_proposal/card.php?action=create&amp;projectid='.$object->id.'&amp;socid='.$object->socid),
-					50 => array('lang' => 'suppliers', 'enabled' => isModEnabled("supplier_order"), 'perm' => $user->hasRight('fournisseur', 'commande', 'creer') ? true : false, 'label' => 'AddSupplierOrder', 'url' => '/fourn/commande/card.php?action=create&amp;projectid='.$object->id.'&amp;socid='.$object->socid),
-					60 => array('lang' => 'suppliers', 'enabled' => isModEnabled("supplier_invoice"), 'perm' => $user->hasRight('fournisseur', 'facture', 'creer') ? true : false, 'label' => 'AddSupplierInvoice', 'url' => '/fourn/facture/card.php?action=create&amp;projectid='.$object->id.'&amp;socid='.$object->socid),
-					70 => array('lang' => 'interventions', 'enabled' => isModEnabled("intervention"), 'perm' => $user->hasRight('fichinter', 'creer') ? true : false, 'label' => 'AddIntervention', 'url' => '/fichinter/card.php?action=create&amp;projectid='.$object->id.'&amp;socid='.$object->socid),
-					80 => array('lang' => 'contracts', 'enabled' => isModEnabled("contract"), 'perm' => $user->hasRight('contrat', 'creer') ? true : false, 'label' => 'AddContract', 'url' => '/contrat/card.php?action=create&amp;projectid='.$object->id.'&amp;socid='.$object->socid),
-					90 => array('lang' => 'trips', 'enabled' => isModEnabled("expensereport"), 'perm' => $user->hasRight('expensereport', 'creer') ? true : false, 'label' => 'AddTrip', 'url' => '/expensereport/card.php?action=create&amp;projectid='.$object->id.'&amp;socid='.$object->socid),
-					100 => array('lang' => 'donations', 'enabled' => isModEnabled("don"), 'perm' => $user->hasRight('don', 'creer') ? true : false, 'label' => 'AddDonation', 'url' => '/don/card.php?action=create&amp;projectid='.$object->id.'&amp;socid='.$object->socid),
+					10 => array('lang'=>'propal', 'enabled' => (isModEnabled("propal") && $is_customer_or_prospect), 'perm' => $user->hasRight('propal', 'creer') ? true : false, 'label' => 'AddProp', 'url'=>'/comm/propal/card.php?action=create&amp;projectid='.$object->id.'&amp;socid='.$object->socid),
+					20 => array('lang'=>'orders', 'enabled' => (isModEnabled("order") && $is_customer_or_prospect), 'perm' => $user->hasRight('commande', 'creer') ? true : false, 'label' => 'CreateOrder', 'url'=>'/commande/card.php?action=create&amp;projectid='.$object->id.'&amp;socid='.$object->socid),
+					30 => array('lang'=>'bills', 'enabled' => (isModEnabled("invoice") && $is_customer_or_prospect), 'perm' => $user->hasRight('facture', 'creer') ? true : false, 'label' => 'CreateBill', 'url'=>'/compta/facture/card.php?action=create&amp;projectid='.$object->id.'&amp;socid='.$object->socid),
+					40 => array('lang'=>'supplier_proposal', 'enabled' => isModEnabled("supplier_proposal"), 'perm' => $user->hasRight('supplier_proposal', 'creer') ? true : false, 'label' => 'AddSupplierProposal', 'url'=>'/supplier_proposal/card.php?action=create&amp;projectid='.$object->id.($is_supplier_only ? '&amp;socid='.$object->socid : '')),
+					50 => array('lang'=>'suppliers', 'enabled' => isModEnabled("supplier_order"), 'perm' => $user->hasRight('fournisseur', 'commande', 'creer') ? true : false, 'label' => 'AddSupplierOrder', 'url'=>'/fourn/commande/card.php?action=create&amp;projectid='.$object->id.($is_supplier_only ? '&amp;socid='.$object->socid : '')),
+					60 => array('lang'=>'suppliers', 'enabled' => isModEnabled("supplier_invoice"), 'perm' => $user->hasRight('fournisseur', 'facture', 'creer') ? true : false, 'label' => 'AddSupplierInvoice', 'url'=>'/fourn/facture/card.php?action=create&amp;projectid='.$object->id.($is_supplier_only ? '&amp;socid='.$object->socid : '')),
+					70 => array('lang'=>'interventions', 'enabled' => isModEnabled("intervention"), 'perm' => $user->hasRight('fichinter', 'creer') ? true : false, 'label' => 'AddIntervention', 'url'=>'/fichinter/card.php?action=create&amp;projectid='.$object->id.'&amp;socid='.$object->socid),
+					80 => array('lang'=>'contracts', 'enabled' => isModEnabled("contract"), 'perm' => $user->hasRight('contrat', 'creer') ? true : false, 'label' => 'AddContract', 'url'=>'/contrat/card.php?action=create&amp;projectid='.$object->id.'&amp;socid='.$object->socid),
+					90 => array('lang'=>'trips', 'enabled' => isModEnabled("expensereport"), 'perm' => $user->hasRight('expensereport', 'creer') ? true : false, 'label' => 'AddTrip', 'url'=>'/expensereport/card.php?action=create&amp;projectid='.$object->id.'&amp;socid='.$object->socid),
+				   100 => array('lang'=>'donations', 'enabled' => isModEnabled("don"), 'perm' => $user->hasRight('don', 'creer') ? true : false, 'label' => 'AddDonation', 'url'=>'/don/card.php?action=create&amp;projectid='.$object->id.'&amp;socid='.$object->socid),
 				);
 
 				$params = array('backtopage' => $_SERVER["PHP_SELF"].'?id='.$object->id);

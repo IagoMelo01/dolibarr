@@ -316,7 +316,7 @@ th.liste_titre a div div:hover, th.liste_titre_sel a div div:hover { text-decora
 tr.liste_titre th.liste_titre_sel:not(.maxwidthsearch), tr.liste_titre td.liste_titre_sel:not(.maxwidthsearch),
 tr.liste_titre th.liste_titre:not(.maxwidthsearch), tr.liste_titre td.liste_titre:not(.maxwidthsearch) { opacity: 0.8; }
 /* th.liste_titre_sel a, th.liste_titre a, td.liste_titre_sel a, td.liste_titre a { color: #766; } */
-tr.liste_titre_filter th.liste_titre { text-align: unset; }
+tr.liste_titre_filter th.liste_titre:not(.center) { text-align: unset; }
 .liste_titre.trheight5em {
 	height: 4em !important;
 }
@@ -1055,7 +1055,7 @@ textarea.centpercent {
 	word-break: break-word !important;
 }
 .wordbreak {
-	word-break: break-word;	/* cut fist between word, inside word if not possible */
+	word-break: break-word;	/* cut first between word, inside word if not possible */
 }
 .wordbreakall {
 	word-break: break-all;
@@ -1875,7 +1875,7 @@ div.ticketpublicarealist>form>div.div-table-responsive {
 	margin: 20px 20px 20px 20px;
 }
 .flexcontainer {
-	<?php if (in_array($conf->browser->name, array('chrome', 'firefox'))) {
+	<?php if (in_array($conf->browser->name, array('chrome', 'firefox', 'safari'))) {
 		echo 'display: inline-flex;'."\n";
 	} ?>
 	flex-flow: row wrap;
@@ -1989,7 +1989,7 @@ maxscreenheightless200 {
 .maxwidth40  { max-width: 40px; }
 .maxwidth50  { max-width: 50px; }
 .maxwidth75  { max-width: 75px; }
-.maxwidthdate  { max-width: 85px; }
+.maxwidthdate  { max-width: 95px; }
 .maxwidth100 { max-width: 100px; }
 .maxwidth125 { max-width: 125px; }
 .maxwidth150 { max-width: 150px; }
@@ -2313,7 +2313,7 @@ datalist {
 
 .linkobject { cursor: pointer; }
 
-table.tableforfield tr:not(.liste_titre)>td:first-of-type, tr.trforfield:not(.liste_titre)>td:first-of-type, div.tableforfield div.tagtr:not(.liste_titre)>div.tagtd:first-of-type {
+table.tableforfield tr:not(.liste_titre)>td:first-of-type:not(.nottitleforfield), tr.trforfield:not(.liste_titre)>td:first-of-type, div.tableforfield div.tagtr:not(.liste_titre)>div.tagtd:first-of-type {
 	color: var(--tableforfieldcolor);
 }
 
@@ -3990,9 +3990,6 @@ a.tabTitle {
 	margin-<?php print $right; ?>: 10px;
 	text-decoration: none;
 	white-space: nowrap;
-}
-.tabTitleText {
-	display: none;
 }
 .imgTabTitle {
 	max-height: 14px;
@@ -6357,11 +6354,15 @@ table.jPicker tr:first-of-type td {
 	width: unset !important;
 	height: 50% !important;
 }
+.jPicker div[class="Map"] {
+	max-width: 150px;
+}
 table.jPicker {
 	border-radius: 5px;
 	border: 1px solid #bbb !important;
 	background-color: var(--colorbackbody) !important;
 	box-shadow: 0px 0px 10px #ccc;
+	width: 300px !important;
 }
 .jPicker .Grid {
 	background-image: unset !important;
@@ -7377,10 +7378,10 @@ span#select2-boxbookmark-container {
 
 /* To emulate select 2 style */
 .select2-container-multi-dolibarr .select2-choices-dolibarr .select2-search-choice-dolibarr {
-  padding: 3px 5px 2px 5px;
+  padding: 3px 5px 3px 5px;
   margin: 0 0 2px 3px;
   position: relative;
-  line-height: 13px;
+  /* line-height: 1em; */
   color: #333;
   cursor: default;
   border: 1px solid #aaaaaa;
@@ -7654,7 +7655,8 @@ dl.dropdown {
 	/* color: var(--colortext); */
 	color: var(--colortext);
 }
-.dropdown dd ul li:hover {
+
+dropdown dd ul li:hover:not(.linputsearch) {
 	background: #eee;
 }
 .dropdown dd ul li input[type="checkbox"] {

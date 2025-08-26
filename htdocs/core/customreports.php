@@ -38,7 +38,12 @@
  * @var HookManager $hookmanager
  * @var Translate $langs
  * @var User $user
+ *
+ * @var ?int[]	$toselect  Items selected on page, only used to see if not empty here
  */
+'
+@phan-var-force ?int[] $toselect
+';
 
 if (!defined('USE_CUSTOM_REPORT_AS_INCLUDE')) {
 	require '../main.inc.php';
@@ -87,13 +92,12 @@ if (!defined('USE_CUSTOM_REPORT_AS_INCLUDE')) {
 
 	$object = null;
 } else {
-	// When included
+	// When included into a main page
 	'
 	@phan-var-force int<0,1> $SHOWLEGEND
 	@phan-var-force string customreportkey
 	';
 
-	$langs->load("main");
 	// $search_measures, $search_xaxis or $search_yaxis may have been defined by the parent.
 
 	if (empty($user) || empty($user->id)) {
@@ -149,7 +153,7 @@ $arrayoftype = array(
 	'proposal' => array('label' => 'Proposals', 'picto' => 'proposal', 'ObjectClassName' => 'Propal', 'enabled' => isModEnabled('propal'), 'ClassPath' => "/comm/propal/class/propal.class.php"),
 	'order' => array('label' => 'Orders', 'picto' => 'order', 'ObjectClassName' => 'Commande', 'enabled' => isModEnabled('order'), 'ClassPath' => "/commande/class/commande.class.php"),
 	'invoice' => array('langs' => 'facture', 'label' => 'Invoices', 'picto' => 'bill', 'ObjectClassName' => 'Facture', 'enabled' => isModEnabled('invoice'), 'ClassPath' => "/compta/facture/class/facture.class.php"),
-	'invoice_template' => array('label' => 'PredefinedInvoices', 'picto' => 'bill', 'ObjectClassName' => 'FactureRec', 'enabled' => isModEnabled('invoice'), 'ClassPath' => "/compta/class/facturerec.class.php", 'langs' => 'bills'),
+	'invoice_template' => array('label' => 'PredefinedInvoices', 'picto' => 'bill', 'ObjectClassName' => 'FactureRec', 'enabled' => isModEnabled('invoice'), 'ClassPath' => "/compta/facture/class/facture-rec.class.php", 'langs' => 'bills'),
 	'contract' => array('label' => 'Contracts', 'picto' => 'contract', 'ObjectClassName' => 'Contrat', 'enabled' => isModEnabled('contract'), 'ClassPath' => "/contrat/class/contrat.class.php", 'langs' => 'contracts'),
 	'contractdet' => array('label' => 'ContractLines', 'picto' => 'contract', 'ObjectClassName' => 'ContratLigne', 'enabled' => isModEnabled('contract'), 'ClassPath' => "/contrat/class/contrat.class.php", 'langs' => 'contracts'),
 	'bom' => array('label' => 'BOM', 'picto' => 'bom', 'ObjectClassName' => 'Bom', 'enabled' => isModEnabled('bom')),
@@ -336,9 +340,10 @@ if (!empty($object->element_for_permission)) {
 	$features .= (empty($object->module) ? '' : '@'.$object->module);
 }
 
+// Security check
 restrictedArea($user, $features, 0, '');
 
-$error = 0;
+//$error = 0;
 
 
 /*
@@ -645,7 +650,7 @@ if (!defined('MAIN_CUSTOM_REPORT_KEEP_GRAPH_ONLY')) {
 	foreach ($arrayofmesures as $key => $val) {
 		$simplearrayofmesures[$key] = $arrayofmesures[$key]['label'];
 	}
-	print $form->multiselectarray('search_measures', $simplearrayofmesures, $search_measures, 0, 0, 'minwidth300 widthcentpercentminusx', 1, 0, '', '', $langs->trans("Measures"));	// Fill the array $arrayofmeasures with possible fields
+	print $form->multiselectarray('search_measures', $simplearrayofmesures, $search_measures, 0, 0, 'minwidth300 widthcentpercentminusx', 1, 0, '', '', $langs->transnoentitiesnoconv("Measures"));	// Fill the array $arrayofmeasures with possible fields
 	print '</div>';
 
 	// XAxis

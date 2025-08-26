@@ -601,6 +601,7 @@ function projectLinesa(&$inc, $parent, &$lines, &$level, $var, $showproject, &$t
 {
 	global $user, $langs, $conf, $db, $hookmanager;
 	global $projectstatic, $taskstatic, $extrafields;
+	global $objectoffield;
 
 	'
 	@phan-var-force Project $projectstatic
@@ -915,7 +916,6 @@ function projectLinesa(&$inc, $parent, &$lines, &$level, $var, $showproject, &$t
 						$numcontact = count($tab);
 						if (!empty($numcontact)) {
 							foreach ($tab as $contacttask) {
-								//var_dump($contacttask);
 								if ($source == 'internal') {
 									$c = new User($db);
 								} else {
@@ -924,15 +924,23 @@ function projectLinesa(&$inc, $parent, &$lines, &$level, $var, $showproject, &$t
 								$c->fetch($contacttask['id']);
 								if (!empty($c->photo)) {
 									if (get_class($c) == 'User') {
+										/** @var User $c */
+										'@phan-var-force User $c';
 										print $c->getNomUrl(-2, '', 0, 0, 24, 1, '', ($ifisrt ? '' : 'notfirst'));
 									} else {
-										print $c->getNomUrl(-2, '', 0, 0, -1, 0, ($ifisrt ? '' : 'notfirst'));
+										/** @var Contact $c */
+										'@phan-var-force Contact $c';
+										print $c->getNomUrl(-2, '', 0, '', -1, 0, ($ifisrt ? '' : 'notfirst'));
 									}
 								} else {
 									if (get_class($c) == 'User') {
+										/** @var User $c */
+										'@phan-var-force User $c';
 										print $c->getNomUrl(2, '', 0, 0, 24, 1, '', ($ifisrt ? '' : 'notfirst'));
 									} else {
-										print $c->getNomUrl(2, '', 0, 0, -1, 0, ($ifisrt ? '' : 'notfirst'));
+										/** @var Contact $c */
+										'@phan-var-force Contact $c';
+										print $c->getNomUrl(2, '', 0, '', -1, 0, ($ifisrt ? '' : 'notfirst'));
 									}
 								}
 								$ifisrt = 0;
@@ -957,6 +965,7 @@ function projectLinesa(&$inc, $parent, &$lines, &$level, $var, $showproject, &$t
 				$extrafieldsobjectkey = $taskstatic->table_element;
 				$extrafieldsobjectprefix = 'efpt.';
 				$obj = $lines[$i];
+				$object = $lines[$i];
 				include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_print_fields.tpl.php';
 				// Fields from hook
 				$parameters = array('arrayfields' => $arrayfields, 'obj' => $lines[$i]);

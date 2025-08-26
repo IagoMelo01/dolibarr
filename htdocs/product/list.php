@@ -648,7 +648,7 @@ if ($search_accountancy_code_buy_intra) {
 if ($search_accountancy_code_buy_export) {
 	$sql .= natural_search($alias_product_perentity . '.accountancy_code_buy_export', clean_account($search_accountancy_code_buy_export));
 }
-if (getDolGlobalString('PRODUCT_USE_UNITS') && $search_units && $search_units != '-1') {
+if (getDolGlobalString('PRODUCT_USE_UNITS') && !empty($search_units) && $search_units != '-1' && $search_units !== 'none') {
 	$sql .= natural_search('cu.rowid', $search_units);
 }
 
@@ -658,7 +658,7 @@ include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_sql.tpl.php';
 $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListWhere', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
 $sql .= $hookmanager->resPrint;
-$sql .= " GROUP BY p.rowid, p.ref, p.description, p.label, p.barcode, p.price, p.tva_tx, p.price_ttc, p.price_base_type,";
+$sql .= " GROUP BY p.rowid, p.ref, p.ref_ext, p.description, p.label, p.barcode, p.price, p.tva_tx, p.price_ttc, p.price_base_type,";
 $sql .= " p.fk_product_type, p.duration, p.finished, p.tosell, p.tobuy, p.seuil_stock_alerte, p.desiredstock,";
 $sql .= ' p.datec, p.tms, p.entity, p.tobatch, p.pmp, p.cost_price, p.stock,';
 if (!getDolGlobalString('MAIN_PRODUCT_PERENTITY_SHARED')) {
@@ -874,7 +874,9 @@ $arrayofmassactions = array(
 	//'presend'=>img_picto('', 'email', 'class="pictofixedwidth"').$langs->trans("SendByMail"),
 );
 if ($user->hasRight($rightskey, 'creer')) {
-	if (getDolGlobalString('PRODUCT_PRICE_UNIQ') || getDolGlobalString('PRODUIT_CUSTOMER_PRICES')) {
+	if (getDolGlobalString('PRODUCT_PRICE_UNIQ')
+		|| getDolGlobalString('PRODUIT_CUSTOMER_PRICES')
+		|| getDolGlobalString('PRODUIT_MULTIPRICES')) {
 		$arrayofmassactions['preupdateprice'] = img_picto('', 'edit', 'class="pictofixedwidth"').$langs->trans("UpdatePrice");
 	}
 
@@ -1626,6 +1628,7 @@ while ($i < $imaxinloop) {
 	}
 
 	$product_static->price = $obj->price;
+	$product_static->price_ttc = $obj->price_ttc; // Allows to use price_ttc in calculated extra fields (ex : price per kilo)
 
 	$object = $product_static;
 

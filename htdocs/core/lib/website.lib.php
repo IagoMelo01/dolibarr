@@ -286,12 +286,12 @@ function dolWebsiteOutput($content, $contenttype = 'html', $containerid = 0)
 	global $db, $langs, $conf, $user;
 	global $dolibarr_main_url_root, $dolibarr_main_data_root;
 	global $website;
-	global $includehtmlcontentopened;
+	global $includehtmlcontentopened;	// $includehtmlcontentopened is the level of includes (start at 0 for main page, 1 for first level include, ...)
 	'@phan-var-force Website $website';
 
 	$nbrep = 0;
 
-	dol_syslog("dolWebsiteOutput start - contenttype=".$contenttype." containerid=".$containerid." USEDOLIBARREDITOR=".(defined('USEDOLIBARREDITOR') ? '1' : '')." USEDOLIBARRSERVER=".(defined('USEDOLIBARRSERVER') ? '1' : '').' includehtmlcontentopened='.$includehtmlcontentopened);
+	dol_syslog("dolWebsiteOutput start - contenttype=".$contenttype." containerid=".$containerid.(defined('USEDOLIBARREDITOR') ? ' USEDOLIBARREDITOR=1' : '').(defined('USEDOLIBARRSERVER') ? ' USEDOLIBARRSERVER=1' : '').' includehtmlcontentopened='.$includehtmlcontentopened);
 
 	//print $containerid.' '.$content;
 
@@ -558,7 +558,7 @@ function redirectToContainer($containerref, $containeraliasalt = '', $containeri
 			unset($tmpwebsitepage);
 		}
 		if ($result > 0) {
-			$currenturi = $_SERVER["REQUEST_URI"];	// Example: /public/website/index.php?website=mywebsite.com&pageref=mywebsite-home&nocache=1708177483
+			$currenturi = $_SERVER["REQUEST_URI"];	// Example: /public/website/index.php?website=mywebsite.com&pageref=mywebsite-home&cache=3600
 			$regtmp = array();
 			if (preg_match('/&pageref=([^&]+)/', $currenturi, $regtmp)) {
 				if ($regtmp[0] == $containerref) {
@@ -779,13 +779,13 @@ function getStructuredData($type, $data = array())
 
 			$pageurl = $websitepage->pageurl;
 			$title = $websitepage->title;
-			$image = $websitepage->image;
+			$image = getImageFromHtmlContent($websitepage->content);
 			$companyname = $mysoc->name;
 			$description = $websitepage->description;
 
 			$pageurl = str_replace('__WEBSITE_KEY__', $website->ref, $pageurl);
 			$title = str_replace('__WEBSITE_KEY__', $website->ref, $title);
-			$image = '/medias'.(preg_match('/^\//', $image) ? '' : '/').str_replace('__WEBSITE_KEY__', $website->ref, $image);
+			$imagepath = '/medias'.(preg_match('/^\//', $image) ? '' : '/').str_replace('__WEBSITE_KEY__', $website->ref, $image);
 			$companyname = str_replace('__WEBSITE_KEY__', $website->ref, $companyname);
 			$description = str_replace('__WEBSITE_KEY__', $website->ref, $description);
 
@@ -798,10 +798,14 @@ function getStructuredData($type, $data = array())
 				    "@type": "WebPage",
 				    "@id": "'.dol_escape_json($pageurl).'"
 				  },
-				  "headline": "'.dol_escape_json($title).'",
+				  "headline": "'.dol_escape_json($title).'",';
+			if ($image) {
+				$ret .= '
 				  "image": [
-				    "'.dol_escape_json($image).'"
-				   ],
+				    "'.dol_escape_json($imagepath).'"
+				   ],';
+			}
+			$ret .= '
 				  "dateCreated": "'.dol_print_date($websitepage->date_creation, 'dayhourrfc').'",
 				  "datePublished": "'.dol_print_date($websitepage->date_creation, 'dayhourrfc').'",
 				  "dateModified": "'.dol_print_date($websitepage->date_modification, 'dayhourrfc').'",
@@ -814,7 +818,7 @@ function getStructuredData($type, $data = array())
 				     "name": "'.dol_escape_json($companyname).'",
 				     "logo": {
 				        "@type": "ImageObject",
-				        "url": "/wrapper.php?modulepart=mycompany&file=logos%2F'.urlencode($mysoc->logo).'"
+				        "url": "/wrapper.php?modulepart=mycompany&file='.urlencode('logos/'.$mysoc->logo).'"
 				     }
 				   },'."\n";
 			if ($websitepage->keywords) {
@@ -1076,10 +1080,11 @@ function getNbOfImagePublicURLOfObject($object)
  * @param	Object	$object			Object
  * @param	int		$no				Numero of image (if there is several images. 1st one by default)
  * @param   string  $extName        Extension to differentiate thumb file name ('', '_small', '_mini')
+ * @param	int		$cover			1=Sort with cover then position, -1=Filter on cover last then position, 0=Exclude cover and filter on position first
  * @return  string					HTML img content or '' if no image found
  * @see getNbOfImagePublicURLOfObject(), getPublicFilesOfObject(), getImageFromHtmlContent()
  */
-function getImagePublicURLOfObject($object, $no = 1, $extName = '')
+function getImagePublicURLOfObject($object, $no = 1, $extName = '', $cover = 1)
 {
 	global $db;
 
@@ -1094,7 +1099,12 @@ function getImagePublicURLOfObject($object, $no = 1, $extName = '')
 	$sql .= " WHERE entity IN (".getEntity($object->element).")";
 	$sql .= " AND src_object_type = '".$db->escape($object->element)."' AND src_object_id = ".((int) $object->id);	// Filter on object
 	$sql .= " AND ".$db->regexpsql('filename', $regexforimg, 1);
-	$sql .= $db->order("cover,position,rowid", "ASC,ASC,ASC");
+	$sql .= ($cover ? "" : " AND cover <> 1");
+	if ($cover == 1) {
+		$sql .= $db->order("cover,position,rowid", "ASC,ASC,ASC");
+	} else {
+		$sql .= $db->order("cover,position,rowid", "DESC,ASC,ASC");
+	}
 
 	$resql = $db->query($sql);
 	if ($resql) {
@@ -1563,9 +1573,15 @@ function getAllImages($object, $objectpage, $urltograb, &$tmp, &$action, $modify
 					dol_mkdir(dirname($filetosave));
 
 					$fp = fopen($filetosave, "w");
-					fwrite($fp, $tmpgeturl['content']);
-					fclose($fp);
-					dolChmod($filetosave);
+					if ($fp) {
+						fwrite($fp, $tmpgeturl['content']);
+						fclose($fp);
+						dolChmod($filetosave);
+					} else {
+						$error++;
+						setEventMessages('Error failed to open file '.$filetosave.' for writing', null, 'errors');
+						$action = 'create';
+					}
 				}
 			}
 		}

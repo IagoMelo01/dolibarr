@@ -419,7 +419,7 @@ if ($action == 'create') {
 			print '<td class="fieldrequired">'.$langs->trans('ThirdParty').'</td>';
 			print '<td>';
 			$filter = '((s.client:IN:1,2,3) AND (status:=:1))';
-			print $form->select_company('', 'socid', $filter, 'SelectThirdParty', 0, 0, null, 0, 'minwidth300');
+			print $form->select_company($socid, 'socid', $filter, 'SelectThirdParty', 0, 0, null, 0, 'minwidth300');
 			// Option to reload page to retrieve customer information. Note, this clear other input
 			if (getDolGlobalString('RELOAD_PAGE_ON_CUSTOMER_CHANGE_DISABLED')) {
 				print '<script type="text/javascript">
@@ -435,7 +435,7 @@ if ($action == 'create') {
 				});
 				</script>';
 			}
-			print ' <a href="'.DOL_URL_ROOT.'/societe/card.php?action=create&client=3&fournisseur=0&backtopage='.urlencode($_SERVER["PHP_SELF"].'?action=create').'"><span class="fa fa-plus-circle valignmiddle paddingleft" title="'.$langs->trans("AddThirdParty").'"></span></a>';
+			print ' <a href="'.DOL_URL_ROOT.'/societe/card.php?action=create&customer=3&fournisseur=0&backtopage='.urlencode($_SERVER["PHP_SELF"].'?action=create').'"><span class="fa fa-plus-circle valignmiddle paddingleft" title="'.$langs->trans("AddThirdParty").'"></span></a>';
 			print '</td>';
 		}
 		print '</tr>'."\n";

@@ -15,7 +15,7 @@
  * Copyright (C) 2017		Rui Strecht					<rui.strecht@aliartalentos.com>
  * Copyright (C) 2018		Philippe Grand				<philippe.grand@atoo-net.com>
  * Copyright (C) 2019-2020	Josep Lluís Amador			<joseplluis@lliuretic.cat>
- * Copyright (C) 2019-2024	Frédéric France				<frederic.france@free.fr>
+ * Copyright (C) 2019-2025  Frédéric France				<frederic.france@free.fr>
  * Copyright (C) 2020		Open-Dsi					<support@open-dsi.fr>
  * Copyright (C) 2022		ButterflyOfFire				<butterflyoffire+dolibarr@protonmail.com>
  * Copyright (C) 2023-2024	Alexandre Janniaux			<alexandre.janniaux@gmail.com>
@@ -2029,7 +2029,7 @@ class Societe extends CommonObject
 				$this->entity       = $obj->entity;
 				$this->canvas = $obj->canvas;
 
-				$this->ref          = $obj->rowid;
+				$this->ref          = $obj->name;
 				$this->name = $obj->name;
 				$this->nom          = $obj->name; // deprecated
 				$this->name_alias = $obj->name_alias;
@@ -2941,7 +2941,7 @@ class Societe extends CommonObject
 		}
 
 		if (!empty($this->address)) {
-			$datas['address'] = '<br><b>'.$langs->trans("Address").':</b> '.dol_format_address($this, 1, ' ', $langs); // Address + country
+			$datas['address'] = '<br><b>'.$langs->trans("Address").':</b> '.dol_format_address($this, 1, ', ', $langs); // Address + country
 		} elseif (!empty($this->country_code)) {
 			$datas['address'] = '<br><b>'.$langs->trans('Country').':</b> '.$this->country_code;
 		}
@@ -3075,8 +3075,7 @@ class Societe extends CommonObject
 		} else {
 			$label = implode($this->getTooltipContentArray($params));
 		}
-		print "\n";
-		//var_dump($label);exit;
+
 		$linkstart = '';
 		$linkend = '';
 
@@ -4231,7 +4230,7 @@ class Societe extends CommonObject
 	public function isACompany()
 	{
 		// Define if third party is treated as company (or not) when nature is unknown
-		$isACompany = getDolGlobalInt('MAIN_UNKNOWN_CUSTOMERS_ARE_COMPANIES');
+		$isACompany = getDolGlobalInt('MAIN_UNKNOWN_CUSTOMERS_ARE_COMPANIES', 1);	// default if not set is 1 because it was like this in all past versions
 
 		// Now try to guess using different tips
 		if (!empty($this->tva_intra)) {
@@ -4239,12 +4238,9 @@ class Societe extends CommonObject
 		} elseif (!empty($this->idprof1) || !empty($this->idprof2) || !empty($this->idprof3) || !empty($this->idprof4) || !empty($this->idprof5) || !empty($this->idprof6)) {
 			$isACompany = 1;
 		} else {
-			if (!getDolGlobalString('MAIN_CUSTOMERS_ARE_COMPANIES_EVEN_IF_SET_AS_INDIVIDUAL')) {
-				// TODO Add a field is_a_company into dictionary
-				if (preg_match('/^TE_PRIVATE/', $this->typent_code)) {
+			if (!getDolGlobalString('MAIN_CUSTOMERS_ARE_COMPANIES_EVEN_IF_SET_AS_INDIVIDUAL')) {	// never or rarely set
+				if (preg_match('/^TE_PRIVATE/', $this->typent_code)) {	// TODO Add a field is_a_company into dictionary
 					$isACompany = 0;
-				} else {
-					$isACompany = 1;
 				}
 			} else {
 				$isACompany = 1;
@@ -4633,6 +4629,10 @@ class Societe extends CommonObject
 		$this->idprof4 = getDolGlobalString('MAIN_INFO_RCS');
 		$this->idprof5 = getDolGlobalString('MAIN_INFO_PROFID5');
 		$this->idprof6 = getDolGlobalString('MAIN_INFO_PROFID6');
+		$this->idprof7 = getDolGlobalString('MAIN_INFO_PROFID7');
+		$this->idprof8 = getDolGlobalString('MAIN_INFO_PROFID8');
+		$this->idprof9 = getDolGlobalString('MAIN_INFO_PROFID9');
+		$this->idprof10 = getDolGlobalString('MAIN_INFO_PROFID10');
 		$this->tva_intra = getDolGlobalString('MAIN_INFO_TVAINTRA'); // VAT number, not necessarily INTRA.
 		$this->managers = getDolGlobalString('MAIN_INFO_SOCIETE_MANAGERS');
 		$this->capital = is_numeric(getDolGlobalString('MAIN_INFO_CAPITAL')) ? (float) price2num(getDolGlobalString('MAIN_INFO_CAPITAL')) : 0;
@@ -4652,6 +4652,8 @@ class Societe extends CommonObject
 		// Define if company use local taxes
 		$this->localtax1_assuj = ((isset($conf->global->FACTURE_LOCAL_TAX1_OPTION) && (getDolGlobalString('FACTURE_LOCAL_TAX1_OPTION') == '1' || getDolGlobalString('FACTURE_LOCAL_TAX1_OPTION') == 'localtax1on')) ? 1 : 0);
 		$this->localtax2_assuj = ((isset($conf->global->FACTURE_LOCAL_TAX2_OPTION) && (getDolGlobalString('FACTURE_LOCAL_TAX2_OPTION') == '1' || getDolGlobalString('FACTURE_LOCAL_TAX2_OPTION') == 'localtax2on')) ? 1 : 0);
+
+		$this->termsofsale = getDolGlobalString('MAIN_INFO_SOCIETE_TERMSOFSALE');
 	}
 
 	/**
@@ -4767,7 +4769,7 @@ class Societe extends CommonObject
 	}
 
 	/**
-	 *  Check if we must use revenue stamps feature or not according to country (country of $mysocin most cases).
+	 *  Check if we must use revenue stamps feature or not according to country (country of $mysoc in most cases).
 	 *  Table c_revenuestamp contains the country and value of stamp per invoice.
 	 *
 	 *  @return		boolean			true or false

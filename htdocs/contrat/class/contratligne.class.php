@@ -494,7 +494,7 @@ class ContratLigne extends CommonObjectLine
 		$sql .= " t.label,"; // This field is not used. Only label of product
 		$sql .= " p.ref as product_ref,";
 		$sql .= " p.label as product_label,";
-		$sql .= " p.description as product_desc,";
+		$sql .= " p.description as product_description,";
 		$sql .= " p.fk_product_type as product_type,";
 		$sql .= " t.description,";
 		$sql .= " t.date_commande,";
@@ -1014,7 +1014,7 @@ class ContratLigne extends CommonObjectLine
 		$sql .= " date_cloture = '".$this->db->idate($date_end_real)."',";
 		$sql .= " fk_user_cloture = ".((int) $user->id).",";
 		$sql .= " commentaire = '".$this->db->escape($comment)."'";
-		$sql .= " WHERE rowid = ".((int) $this->id)." AND statut = ".((int) ContratLigne::STATUS_OPEN);
+		$sql .= " WHERE rowid = ".((int) $this->id)." AND statut <> ".((int) ContratLigne::STATUS_CLOSED);
 
 		$resql = $this->db->query($sql);
 		if ($resql) {
