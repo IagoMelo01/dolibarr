@@ -13,7 +13,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "8080:80"
+      - "8008:80"
     environment:
       PHP_MEMORY_LIMIT: "512M"
       PHP_MAX_INPUT_VARS: "5000"
