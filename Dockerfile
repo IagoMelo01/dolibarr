@@ -46,10 +46,10 @@ RUN { \
       echo "memory_limit=512M"; \
       echo "upload_max_filesize=256M"; \
       echo "post_max_size=256M"; \
-      echo "max_execution_time=120"; \
+      echo "max_execution_time=300"; \  
       echo "date.timezone=America/Sao_Paulo"; \
       echo "opcache.enable=1"; \
-      echo "opcache.validate_timestamps=1"; \  
+      echo "opcache.validate_timestamps=1"; \
       echo "opcache.memory_consumption=128"; \
       echo "opcache.interned_strings_buffer=16"; \
       echo "opcache.max_accelerated_files=10000"; \
