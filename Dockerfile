@@ -41,6 +41,16 @@ RUN { \
       echo "opcache.memory_consumption=128"; \
     } > /usr/local/etc/php/conf.d/dolibarr.ini
 
+RUN docker-php-ext-install calendar
+
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends libc-client-dev libkrb5-dev; \
+    rm -rf /var/lib/apt/lists/*; \
+    docker-php-ext-configure imap --with-kerberos --with-imap-ssl; \
+    docker-php-ext-install imap
+
+
 # Ajuste de usuário/grupo para coincidir com o host
 RUN groupmod -o -g ${APP_GID} www-data && usermod -o -u ${APP_UID} -g ${APP_GID} www-data
 USER www-data
