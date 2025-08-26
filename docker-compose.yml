@@ -6,7 +6,8 @@ services:
       args:
         APP_UID: 1000
         APP_GID: 1000
-        PHP_VERSION: "8.2"   # altere p/ 8.1 ou 8.0 se seu fork exigir
+        PHP_VERSION: "8.2"
+        CACHE_BUSTER: "v1-$(date +%s)" # qualquer string; só pra cache-bust
     container_name: dolibarr-app
     restart: unless-stopped
     depends_on:
@@ -18,10 +19,14 @@ services:
       PHP_MEMORY_LIMIT: "512M"
       PHP_MAX_INPUT_VARS: "5000"
     volumes:
-      - ./:/var/www/html              # seu fork (com htdocs/)
-      - /root/dolifevo/documents:/var/www/html/documents   # persistência
+      - ./:/var/www/html # seu fork (com htdocs/)
+      - /root/dolifevo/documents:/var/www/html/documents # persistência
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost/index.php >/dev/null || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost/index.php >/dev/null || exit 1",
+        ]
       interval: 30s
       timeout: 5s
       retries: 10
@@ -35,7 +40,11 @@ services:
       MYSQL_DATABASE: dolibarr
       MYSQL_USER: dolibarr
       MYSQL_PASSWORD: dolipass
-    command: ["--character-set-server=utf8mb4","--collation-server=utf8mb4_unicode_ci"]
+    command:
+      [
+        "--character-set-server=utf8mb4",
+        "--collation-server=utf8mb4_unicode_ci",
+      ]
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
