@@ -48,7 +48,7 @@ RUN { \
       echo "max_execution_time=120"; \
       echo "date.timezone=America/Sao_Paulo"; \
       echo "opcache.enable=1"; \
-      echo "opcache.validate_timestamps=1"; \  # 0 em produção para mais performance
+      echo "opcache.validate_timestamps=1"; \  
       echo "opcache.memory_consumption=128"; \
       echo "opcache.interned_strings_buffer=16"; \
       echo "opcache.max_accelerated_files=10000"; \
