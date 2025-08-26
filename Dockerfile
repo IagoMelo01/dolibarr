@@ -24,10 +24,11 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
  && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
  && docker-php-ext-install -j"$(nproc)" \
       gd zip intl calendar \
-      mysqli mbstring pdo pdo_mysql \
+      mysqli pdo pdo_mysql \
       pgsql pdo_pgsql \
       imap \
-      opcache
+      opcache \
+ && docker-php-ext-enable mysqli pgsql
 
 # Apache: habilitar módulos e apontar para /var/www/html/htdocs
 RUN a2enmod rewrite headers expires \
