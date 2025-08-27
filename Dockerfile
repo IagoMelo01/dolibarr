@@ -2,11 +2,9 @@
 ARG PHP_VERSION=8.2
 FROM php:${PHP_VERSION}-apache
 
-# UID/GID para evitar arquivos root no host
 ARG APP_UID=1000
 ARG APP_GID=1000
 
-# Pacotes de build/runtime
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
@@ -15,18 +13,16 @@ RUN set -eux; \
       libzip-dev zlib1g-dev \
       libxml2-dev libicu-dev \
       libpq-dev default-mysql-client \
-      libc-client2007e-dev libkrb5-dev \
     ; \
     rm -rf /var/lib/apt/lists/*
 
-# Extensões PHP necessárias
+# Extensões (sem imap)
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
- && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
  && docker-php-ext-install -j"$(nproc)" \
       gd zip intl calendar \
       mysqli mbstring pdo pdo_mysql \
       pgsql pdo_pgsql \
-      imap opcache \
+      opcache \
  && docker-php-ext-enable mysqli pgsql
 
 
