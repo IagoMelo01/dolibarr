@@ -1,8 +1,7 @@
-# Escolha a versão do PHP sem trocar o FROM
-ARG PHP_VERSION=8.1
-FROM php:${PHP_VERSION}-apache
+# Use Debian Bullseye para garantir libc-client e IMAP
+FROM php:8.1-apache-bullseye
 
-# UID/GID para evitar arquivos root no host
+# UID/GID para evitar arquivos root no host (opcional, ajuste se quiser)
 ARG APP_UID=1000
 ARG APP_GID=1000
 
@@ -19,7 +18,7 @@ RUN set -eux; \
     ; \
     rm -rf /var/lib/apt/lists/*
 
-# Extensões PHP necessárias
+# Extensões PHP necessárias ao Dolibarr (inclui IMAP)
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
  && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
  && docker-php-ext-install -j"$(nproc)" \
@@ -28,7 +27,6 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
       pgsql pdo_pgsql \
       imap opcache \
  && docker-php-ext-enable mysqli pgsql
-
 
 # Apache: habilitar módulos e apontar para /var/www/html/htdocs
 RUN a2enmod rewrite headers expires \
@@ -41,13 +39,13 @@ RUN a2enmod rewrite headers expires \
     } > /etc/apache2/conf-available/dolibarr.conf \
  && a2enconf dolibarr
 
-# PHP.ini básico
+# PHP.ini: limites e performance (ajuste se quiser)
 RUN { \
+      echo "date.timezone=America/Sao_Paulo"; \
       echo "memory_limit=512M"; \
       echo "upload_max_filesize=256M"; \
       echo "post_max_size=256M"; \
-      echo "max_execution_time=300"; \  
-      echo "date.timezone=America/Sao_Paulo"; \
+      echo "max_execution_time=300"; \
       echo "opcache.enable=1"; \
       echo "opcache.validate_timestamps=1"; \
       echo "opcache.memory_consumption=128"; \
@@ -57,7 +55,7 @@ RUN { \
       echo "realpath_cache_ttl=600"; \
     } > /usr/local/etc/php/conf.d/dolibarr.ini
 
-# Ajuste de usuário/grupo para casar com o host
+# Ajuste de usuário/grupo para casar com o host (opcional)
 RUN groupmod -o -g ${APP_GID} www-data && usermod -o -u ${APP_UID} -g ${APP_GID} www-data
 USER www-data
 
