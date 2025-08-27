@@ -19,12 +19,12 @@ RUN set -eux; \
     ; \
     rm -rf /var/lib/apt/lists/*
 
-# Extensões PHP necessárias ao Dolibarr
+# Extensões PHP necessárias
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
  && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
  && docker-php-ext-install -j"$(nproc)" \
       gd zip intl calendar \
-      mysqli pdo pdo_mysql \
+      mysqli mbstring pdo pdo_mysql \
       pgsql pdo_pgsql \
       imap opcache \
  && docker-php-ext-enable mysqli pgsql
