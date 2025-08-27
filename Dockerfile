@@ -5,28 +5,33 @@ FROM php:8.1-apache-bullseye
 ARG APP_UID=1000
 ARG APP_GID=1000
 
-# Pacotes de build/runtime
-RUN set -eux; \
-    apt-get update; \
-    apt-get install -y --no-install-recommends \
-      git curl unzip \
-      libpng-dev libjpeg-dev libfreetype6-dev \
-      libzip-dev zlib1g-dev \
-      libxml2-dev libicu-dev \
-      libpq-dev default-mysql-client \
-      libc-client2007e-dev libkrb5-dev \
-    ; \
-    rm -rf /var/lib/apt/lists/*
+RUN set -eux; apt-get update; apt-get install -y --no-install-recommends \
+  git curl unzip \
+  libpng-dev libjpeg-dev libfreetype6-dev \
+  libzip-dev zlib1g-dev \
+  libxml2-dev libicu-dev \
+  libpq-dev default-mysql-client \
+  libc-client2007e-dev libkrb5-dev \
+; rm -rf /var/lib/apt/lists/*
 
-# Extensões PHP necessárias ao Dolibarr (inclui IMAP)
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
- && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
- && docker-php-ext-install -j"$(nproc)" \
-      gd zip intl calendar \
-      mysqli mbstring pdo pdo_mysql \
-      pgsql pdo_pgsql \
-      imap opcache \
- && docker-php-ext-enable mysqli pgsql
+
+# GD
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+RUN docker-php-ext-install -j"$(nproc)" gd
+
+# IMAP
+RUN docker-php-ext-configure imap --with-kerberos --with-imap-ssl
+RUN docker-php-ext-install -j"$(nproc)" imap
+
+# Demais extensões
+RUN docker-php-ext-install -j"$(nproc)" \
+    zip intl calendar \
+    mysqli mbstring pdo pdo_mysql \
+    pgsql pdo_pgsql \
+    opcache
+
+RUN docker-php-ext-enable mysqli pgsql
+
 
 # Apache: habilitar módulos e apontar para /var/www/html/htdocs
 RUN a2enmod rewrite headers expires \
