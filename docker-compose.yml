@@ -49,7 +49,7 @@ services:
       ]
     volumes:
       - db_data:/var/lib/mysql
-       - ./my.cnf:/root/dolifevo/my.cnf:ro
+      - ./my.cnf:/root/dolifevo/my.cnf:ro
     init: true
     mem_limit: 768mb
     healthcheck:
