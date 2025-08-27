@@ -3,44 +3,55 @@ FROM php:8.1-apache-bullseye
 ARG APP_UID=1000
 ARG APP_GID=1000
 
-# Ferramentas de build + libs nativas das extensões
+# Ferramentas de build + libs nativas
 RUN set -eux; \
   apt-get update; \
   apt-get install -y --no-install-recommends \
-    $PHPIZE_DEPS pkg-config \
-    git curl unzip \
+    $PHPIZE_DEPS pkg-config git curl unzip \
     libpng-dev libjpeg-dev libfreetype6-dev \
     libzip-dev zlib1g-dev \
     libxml2-dev libicu-dev \
     libpq-dev default-mysql-client \
-    libc-client2007e-dev libkrb5-dev; \
-  rm -rf /var/lib/apt/lists/*
+    libc-client2007e-dev libkrb5-dev \
+    libonig-dev \
+  ; rm -rf /var/lib/apt/lists/*
 
 # GD
 RUN set -eux; \
   docker-php-ext-configure gd --with-freetype --with-jpeg; \
   docker-php-ext-install -j"$(nproc)" gd
 
-# IMAP (se não precisar, remova este bloco)
+# IMAP (opcional; se der erro, comente estas 2 linhas)
 RUN set -eux; \
   docker-php-ext-configure imap --with-kerberos --with-imap-ssl; \
   docker-php-ext-install -j"$(nproc)" imap
 
-# Drivers MySQL
+# MySQL
 RUN set -eux; \
   docker-php-ext-install -j"$(nproc)" mysqli pdo pdo_mysql; \
   docker-php-ext-enable mysqli
 
-# ZIP / INTL / OPCACHE / CALENDAR / MBSTRING
-RUN set -eux; \
-  docker-php-ext-install -j"$(nproc)" zip intl opcache calendar mbstring
+# ZIP (isola para ver erro se houver)
+RUN set -eux; docker-php-ext-install -j"$(nproc)" zip
 
-# Drivers PostgreSQL (se não usar PG, pode remover)
+# INTL
+RUN set -eux; docker-php-ext-install -j"$(nproc)" intl
+
+# OPCACHE
+RUN set -eux; docker-php-ext-install -j"$(nproc)" opcache
+
+# CALENDAR
+RUN set -eux; docker-php-ext-install -j"$(nproc)" calendar
+
+# MBSTRING
+RUN set -eux; docker-php-ext-install -j"$(nproc)" mbstring
+
+# PostgreSQL (se não usa PG, pode remover este bloco)
 RUN set -eux; \
   docker-php-ext-install -j"$(nproc)" pgsql pdo_pgsql; \
   docker-php-ext-enable pgsql
 
-# Apache + DocumentRoot em htdocs/
+# Apache + htdocs
 RUN set -eux; \
   a2enmod rewrite headers expires; \
   sed -ri 's#DocumentRoot /var/www/html#DocumentRoot /var/www/html/htdocs#g' /etc/apache2/sites-available/000-default.conf; \
@@ -48,7 +59,7 @@ RUN set -eux; \
     > /etc/apache2/conf-available/dolibarr.conf; \
   a2enconf dolibarr
 
-# PHP.ini
+# php.ini
 RUN set -eux; \
   { \
     echo "date.timezone=America/Sao_Paulo"; \
