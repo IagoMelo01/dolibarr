@@ -15,10 +15,14 @@
 
 
 -- BEGIN MODULEBUILDER INDEXES
-ALTER TABLE llx_frota_reservatorio ADD INDEX idx_frota_reservatorio_tipo (tipo);
+ALTER TABLE llx_frota_aluguel ADD INDEX idx_frota_aluguel_rowid (rowid);
+ALTER TABLE llx_frota_aluguel ADD INDEX idx_frota_aluguel_ref (ref);
+ALTER TABLE llx_frota_aluguel ADD INDEX idx_frota_aluguel_fk_soc (fk_soc);
+ALTER TABLE llx_frota_aluguel ADD INDEX idx_frota_aluguel_fk_project (fk_project);
+ALTER TABLE llx_frota_aluguel ADD INDEX idx_frota_aluguel_status (status);
 -- END MODULEBUILDER INDEXES
 
---ALTER TABLE llx_frota_reservatorio ADD UNIQUE INDEX uk_frota_reservatorio_fieldxy(fieldx, fieldy);
+--ALTER TABLE llx_frota_aluguel ADD UNIQUE INDEX uk_frota_aluguel_fieldxy(fieldx, fieldy);
 
---ALTER TABLE llx_frota_reservatorio ADD CONSTRAINT llx_frota_reservatorio_fk_field FOREIGN KEY (fk_field) REFERENCES llx_frota_myotherobject(rowid);
+--ALTER TABLE llx_frota_aluguel ADD CONSTRAINT llx_frota_aluguel_fk_field FOREIGN KEY (fk_field) REFERENCES llx_frota_myotherobject(rowid);
 

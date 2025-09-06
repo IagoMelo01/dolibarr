@@ -37,6 +37,7 @@ require_once DOL_DOCUMENT_ROOT.'/custom/frota/class/compracombustivel.class.php'
 require_once DOL_DOCUMENT_ROOT.'/custom/frota/class/reservatorio.class.php';
 require_once DOL_DOCUMENT_ROOT.'/custom/frota/class/abastecimento.class.php';
 require_once DOL_DOCUMENT_ROOT.'/custom/frota/class/veiculo.class.php';
+require_once DOL_DOCUMENT_ROOT.'/custom/frota/class/manutencao.class.php';
 
 
 /**
@@ -120,51 +121,127 @@ class InterfaceFrotaTriggers extends DolibarrTriggers
 
 
 
-			case "COMPRACOMBUSTIVEL_UPDATE":
+			case "COMPRACOMBUSTIVEL_CREATE":
 
 				$d = date("d-m-Y", time());
 				$comb = new CompraCombustivel($object->db);
 				$comb->fetch($object->id);
 				$new_ref = "(COMPRA-COMBUSTÍVEL: $d, $comb->qty l)";
 				$comb->ref = $new_ref;
-				$u = $comb->update($user);
+				$u = $comb->update($user, true);
 				dol_syslog("Compra de combustivel atualizada retornou $u para ref $new_ref com id $object->id");
 
 				$reservatorio = new Reservatorio($object->db);
 				$reservatorio->fetch($comb->fk_reservatorio);
 
-				$invoice = new Invoice();
+				// $invoice = new Invoice($object->db);
 
 				$reservatorio->nivel += $comb->qty;
-				$r = $reservatorio->update($user);
+				$r = $reservatorio->update($user, true);
 				dol_syslog("Atualização de nível de combustível retornou $r para atualização no reservatorio id $comb->fk_reservatorio quantidade $reservatorio->nivel");
 				
 			break;
 				
 			case "RESERVATORIO_CREATE":
 				
-				$caminho_arquivo = DOL_DOCUMENT_ROOT."/custom/frota/t/testtriggers/reservatorio.txt";
-				file_put_contents($caminho_arquivo, print_r($object, true));
+				// $caminho_arquivo = DOL_DOCUMENT_ROOT."/custom/frota/t/testtriggers/reservatorio.txt";
+				// file_put_contents($caminho_arquivo, print_r($object, true));
 				$r = new Reservatorio($object->db);
 				$r->fetch($object->id);
 				$new_ref = "(RESERVATÓRIO - $r->label - $r->capacidade l)";
 				$r->ref = $new_ref;
-				$r->update($user);
+				$r->update($user, true);
 				// dol_syslog("Trigger reservatório rodado em $r->rowid, retornando $r para o update de ref: $new_ref");
 			break; 
 
-			case "ABASTECIMENTO_UPDATE":
+			case "VEICULO_CREATE":
+				$veiculo = new Veiculo($object->db);
+				$veiculo->fetch($object->id);
+
+				$veiculo->ref = "(VEÍCULO $veiculo->id-$veiculo->num_identificacao-$veiculo->label)";
+				$veiculo->update($user, true);
+
+			break;
+
+			case "MANUTENCAO_CREATE":
+
+				$manutencao = new Manutencao($object->db);
+				$manutencao->fetch($object->id);
+
+				$veiculo = new Veiculo($object->db);
+				$veiculo->fetch($manutencao->fk_veiculo);
+
+				$new_ref = "(MANUTENÇÃO $manutencao->id-$manutencao->label-$veiculo->label $veiculo->num_identificacao)";
+				$manutencao->ref = $new_ref;
+				$r = $manutencao->update($user, true);
+				if($r == 1){
+					dol_syslog("Trigger manutenção rodado em $manutencao->rowid, retornando $r para o update de ref: $new_ref");
+				}
+			
+			break;
+
+			case "SEGURO_CREATE":
+
+				$seguro = new Seguro($object->db);
+				$seguro->fetch($object->id);
+				$seguro->ref = "(SEGURO $seguro->id-$seguro->label)";
+				$r = $seguro->update($user, true);
+				if($r == 1){
+					dol_syslog("Trigger seguro rodado em $seguro->rowid, retornando $r para o update de ref: $seguro->ref");
+				}
+
+			break;
+
+			case "ALUGUEL_CREATE":
+
+				$aluguel = new Aluguel($object->db);
+				$aluguel->fetch($object->id);
+				$aluguel->ref = "(ALUGUEL $aluguel->id-$aluguel->label)";
+				$r = $aluguel->update($user, true);
+				if($r == 1){
+					dol_syslog("Trigger aluguel rodado em $aluguel->rowid, retornando $r para o update de ref: $aluguel->ref");
+				}
+
+			break;
+
+			case "ABASTECIMENTO_CREATE":
 
 				$abastecimento = new Abastecimento($object->db);
 				$abastecimento->fetch($object->id);
-
+				$abastecimento->ref = "(ABASTECIMENTO $abastecimento->id-$abastecimento->label)";
+				$r = $abastecimento->update($user, true);
+				if($r == 1){
+					dol_syslog("Trigger abastecimento rodado em $abastecimento->rowid, retornando $r para o update de ref: $abastecimento->ref");
+				}
 				$reservatorio = new Reservatorio($object->db);
 				$reservatorio->fetch($abastecimento->fk_reservatorio);
-
-				$reservatorio->nivel -= $abastecimento->qty_real;
+				$reservatorio->nivel -= $abastecimento->qty;
 				$r = $reservatorio->update($user, true);
+				if($r == 1){
+					dol_syslog("Trigger abastecimento rodado em $abastecimento->rowid, retornando $r para o update de ref: $abastecimento->ref");
+				}
+				
 
 			break;
+
+			case "ABASTECIMENTO_UPDATE":
+				$abastecimento = new Abastecimento($object->db);
+				$abastecimento->fetch($object->id);
+				if($abastecimento->qty_real != $abastecimento->qty){
+					$reservatorio = new Reservatorio($object->db);
+					$reservatorio->fetch($abastecimento->fk_reservatorio);
+					$reservatorio->nivel += $abastecimento->qty;
+					$reservatorio->nivel -= $abastecimento->qty_real;
+					$r = $reservatorio->update($user, true);
+					if($r == 1){
+						dol_syslog("Trigger abastecimento rodado em $abastecimento->rowid, retornando $r para o update de ref: $abastecimento->ref");
+					}
+					$abastecimento->qty = $abastecimento->qty_real;
+
+				}
+				
+			break;
+
 			// Users
 			//case 'USER_CREATE':
 			//case 'USER_MODIFY':

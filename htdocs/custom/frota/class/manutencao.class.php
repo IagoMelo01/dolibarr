@@ -62,7 +62,7 @@ class Manutencao extends CommonObject
 	/**
 	 * @var string String with name of icon for manutencao. Must be a 'fa-xxx' fontawesome code (or 'fa-xxx_fa_color_size') or 'manutencao@frota' if picto is file 'img/object_manutencao.png'.
 	 */
-	public $picto = 'fa-file';
+	public $picto = 'fa-tools';
 
 
 	const STATUS_DRAFT = 0;
@@ -113,28 +113,28 @@ class Manutencao extends CommonObject
 	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
 	 */
 	public $fields=array(
-		"rowid" => array("type"=>"integer", "label"=>"TechnicalID", "enabled"=>"1", 'position'=>10, 'notnull'=>1, "visible"=>"0",),
-		"ref" => array("type"=>"varchar(128)", "label"=>"Ref", "enabled"=>"1", 'position'=>15, 'notnull'=>1, "visible"=>"-1", "csslist"=>"tdoverflowmax150", "showoncombobox"=>"1",),
-		"label" => array("type"=>"varchar(255)", "label"=>"Label", "enabled"=>"1", 'position'=>20, 'notnull'=>0, "visible"=>"-1", "alwayseditable"=>"1", "css"=>"minwidth300", "cssview"=>"wordbreak", "csslist"=>"tdoverflowmax150",),
-		"amount" => array("type"=>"double", "label"=>"Amount", "enabled"=>"1", 'position'=>25, 'notnull'=>0, "visible"=>"-1", "alwayseditable"=>"1",),
-		"fk_soc" => array("type"=>"integer:Societe:societe/class/societe.class.php", "label"=>"ThirdParty", "picto"=>"company", "enabled"=>"1", 'position'=>30, 'notnull'=>0, "visible"=>"-1", "alwayseditable"=>"1", "css"=>"maxwidth500 widthcentpercentminusxx", "csslist"=>"tdoverflowmax150",),
-		"fk_project" => array("type"=>"integer:project:projet/class/project.class.php", "label"=>"Fkproject", "enabled"=>"1", 'position'=>35, 'notnull'=>0, "visible"=>"-1", "css"=>"maxwidth500 widthcentpercentminusxx", "csslist"=>"tdoverflowmax150",),
-		"description" => array("type"=>"text", "label"=>"Description", "enabled"=>"1", 'position'=>40, 'notnull'=>0, "visible"=>"-1", "alwayseditable"=>"1",),
-		"note_public" => array("type"=>"text", "label"=>"NotePrivate", "enabled"=>"1", 'position'=>45, 'notnull'=>0, "visible"=>"0", "alwayseditable"=>"1", "cssview"=>"wordbreak",),
-		"note_private" => array("type"=>"text", "label"=>"NotePublic", "enabled"=>"1", 'position'=>50, 'notnull'=>0, "visible"=>"0", "alwayseditable"=>"1", "cssview"=>"wordbreak",),
-		"date_creation" => array("type"=>"datetime", "label"=>"Datecreation", "enabled"=>"1", 'position'=>55, 'notnull'=>1, "visible"=>"-1", "alwayseditable"=>"1",),
-		"tms" => array("type"=>"timestamp", "label"=>"DateModification", "enabled"=>"1", 'position'=>60, 'notnull'=>1, "visible"=>"-1", "alwayseditable"=>"1",),
-		"fk_user_creat" => array("type"=>"integer:User:user/class/user.class.php", "label"=>"UserAuthor", "enabled"=>"1", 'position'=>65, 'notnull'=>1, "visible"=>"-2", "alwayseditable"=>"1", "css"=>"maxwidth500 widthcentpercentminusxx", "csslist"=>"tdoverflowmax150",),
-		"fk_user_modif" => array("type"=>"integer:User:user/class/user.class.php", "label"=>"UserModif", "enabled"=>"1", 'position'=>70, 'notnull'=>-1, "visible"=>"-2", "alwayseditable"=>"1", "css"=>"maxwidth500 widthcentpercentminusxx", "csslist"=>"tdoverflowmax150",),
-		"last_main_doc" => array("type"=>"varchar(255)", "label"=>"Lastmaindoc", "enabled"=>"1", 'position'=>75, 'notnull'=>0, "visible"=>"-1", "alwayseditable"=>"1",),
-		"import_key" => array("type"=>"varchar(14)", "label"=>"ImportId", "enabled"=>"1", 'position'=>900, 'notnull'=>0, "visible"=>"-2", "alwayseditable"=>"1",),
-		"model_pdf" => array("type"=>"varchar(255)", "label"=>"Modelpdf", "enabled"=>"1", 'position'=>85, 'notnull'=>0, "visible"=>"0", "alwayseditable"=>"1",),
-		"status" => array("type"=>"integer", "label"=>"Status", "enabled"=>"1", 'position'=>500, 'notnull'=>1, "visible"=>"-1", "alwayseditable"=>"1",),
-		"tipo" => array("type"=>"integer", "label"=>"Tipo", "enabled"=>"1", 'position'=>95, 'notnull'=>1, "visible"=>"-1", "arrayofkeyval"=>array("0" => "Preventiva", "1" => "Preditiva", "2" => "Corretiva"),),
-		"fk_veiculo" => array("type"=>"integer:veiculo:frota/class/veiculo.class.php", "label"=>"Veiculo associado", "enabled"=>"1", 'position'=>100, 'notnull'=>0, "visible"=>"-1", "css"=>"maxwidth500 widthcentpercentminusxx",),
-		"fk_implemento" => array("type"=>"integer:implemento:frota/class/implemento.class.php", "label"=>"Implemento associado", "enabled"=>"1", 'position'=>105, 'notnull'=>0, "visible"=>"-1", "css"=>"maxwidth500 widthcentpercentminusxx",),
-		"data_prevista" => array("type"=>"date", "label"=>"Dataprevista", "enabled"=>"1", 'position'=>110, 'notnull'=>0, "visible"=>"-1", "alwayseditable"=>"1",),
-		"data_concluida" => array("type"=>"date", "label"=>"Dataconcluida", "enabled"=>"1", 'position'=>115, 'notnull'=>0, "visible"=>"-1", "alwayseditable"=>"1",),
+		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
+		'ref' => array('type'=>'varchar(128)', 'label'=>'Ref', 'enabled'=>'1', 'position'=>20, 'notnull'=>1, 'visible'=>5, 'index'=>1, 'searchall'=>1, 'showoncombobox'=>'1', 'css'=>'maxwidth300', 'cssview'=>'wordbreak', 'csslist'=>'tdoverflowmax300', 'validate'=>'1', 'comment'=>"Reference of object"),
+		'label' => array('type'=>'varchar(255)', 'label'=>'Label', 'enabled'=>'1', 'position'=>30, 'notnull'=>0, 'visible'=>1, 'alwayseditable'=>'1', 'searchall'=>1, 'css'=>'minwidth300', 'cssview'=>'wordbreak', 'help'=>"Help text", 'showoncombobox'=>'2', 'validate'=>'1',),
+		'amount' => array('type'=>'price', 'label'=>'Amount', 'enabled'=>'1', 'position'=>40, 'notnull'=>0, 'visible'=>1, 'default'=>'null', 'isameasure'=>'1', 'help'=>"Help text for amount", 'validate'=>'1',),
+		'fk_soc' => array('type'=>'integer:Societe:societe/class/societe.class.php:1:((status:=:1) AND (entity:IN:__SHARED_ENTITIES__))', 'label'=>'ThirdParty', 'picto'=>'company', 'enabled'=>'$conf->societe->enabled', 'position'=>50, 'notnull'=>-1, 'visible'=>1, 'index'=>1, 'css'=>'maxwidth500 widthcentpercentminusxx', 'csslist'=>'tdoverflowmax150', 'help'=>"OrganizationEventLinkToThirdParty", 'validate'=>'1',),
+		'fk_project' => array('type'=>'integer:Project:projet/class/project.class.php:1', 'label'=>'Project', 'picto'=>'project', 'enabled'=>'$conf->project->enabled', 'position'=>52, 'notnull'=>-1, 'visible'=>1, 'index'=>1, 'css'=>'maxwidth500 widthcentpercentminusxx', 'csslist'=>'tdoverflowmax150', 'validate'=>'1',),
+		'description' => array('type'=>'text', 'label'=>'Description', 'enabled'=>'1', 'position'=>60, 'notnull'=>0, 'visible'=>3, 'validate'=>'1',),
+		'note_public' => array('type'=>'html', 'label'=>'NotePublic', 'enabled'=>'1', 'position'=>61, 'notnull'=>0, 'visible'=>0, 'cssview'=>'wordbreak', 'validate'=>'1',),
+		'note_private' => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>'1', 'position'=>62, 'notnull'=>0, 'visible'=>0, 'cssview'=>'wordbreak', 'validate'=>'1',),
+		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),
+		'tms' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>501, 'notnull'=>0, 'visible'=>-2,),
+		'fk_user_creat' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'picto'=>'user', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>-2, 'foreignkey'=>'user.rowid', 'csslist'=>'tdoverflowmax150',),
+		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModif', 'picto'=>'user', 'enabled'=>'1', 'position'=>511, 'notnull'=>-1, 'visible'=>-2, 'csslist'=>'tdoverflowmax150',),
+		'last_main_doc' => array('type'=>'varchar(255)', 'label'=>'LastMainDoc', 'enabled'=>'1', 'position'=>600, 'notnull'=>0, 'visible'=>0,),
+		'import_key' => array('type'=>'varchar(14)', 'label'=>'ImportId', 'enabled'=>'1', 'position'=>1000, 'notnull'=>-1, 'visible'=>-2,),
+		'model_pdf' => array('type'=>'varchar(255)', 'label'=>'Model pdf', 'enabled'=>'1', 'position'=>1010, 'notnull'=>-1, 'visible'=>0,),
+		'status' => array('type'=>'integer', 'label'=>'Status', 'enabled'=>'1', 'position'=>2000, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Rascunho', '1'=>'Validado', '9'=>'Cancelado'), 'validate'=>'1',),
+		'tipo' => array('type'=>'integer', 'label'=>'Tipo de manutenção', 'enabled'=>'1', 'position'=>50, 'notnull'=>1, 'visible'=>1, 'arrayofkeyval'=>array('0'=>'Preventiva', '1'=>'Corretiva', '2'=>'Preditiva'),),
+		'fk_veiculo' => array('type'=>'integer:Veiculo:frota/class/veiculo.class.php:1', 'label'=>'Veículo associado', 'enabled'=>'1', 'position'=>50, 'notnull'=>0, 'visible'=>1,),
+		'fk_implemento' => array('type'=>'integer:Implemento:frota/class/implemento.class.php:1', 'label'=>'Implemento associado', 'enabled'=>'1', 'position'=>50, 'notnull'=>0, 'visible'=>1,),
+		'data_prevista' => array('type'=>'date', 'label'=>'Data prevista para manutenção', 'enabled'=>'1', 'position'=>50, 'notnull'=>0, 'visible'=>1,),
+		'data_concluida' => array('type'=>'date', 'label'=>'Data da conclusão da manutenção', 'enabled'=>'1', 'position'=>50, 'notnull'=>0, 'visible'=>1,),
 	);
 	public $rowid;
 	public $ref;

@@ -88,7 +88,7 @@ class modFrota extends DolibarrModules
 		// Define some features supported by module (triggers, login, substitutions, menus, css, etc...)
 		$this->module_parts = array(
 			// Set this to 1 if module has its own trigger directory (core/triggers)
-			'triggers' => 0,
+			'triggers' => 1,
 			// Set this to 1 if module has its own login method file (core/login)
 			'login' => 0,
 			// Set this to 1 if module has its own substitution function file (core/substitutions)
@@ -236,11 +236,11 @@ class modFrota extends DolibarrModules
 		// Add here list of php file(s) stored in frota/core/boxes that contains a class to show a widget.
 		/* BEGIN MODULEBUILDER WIDGETS */
 		$this->boxes = array(
-			//  0 => array(
-			//      'file' => 'frotawidget1.php@frota',
-			//      'note' => 'Widget provided by Frota',
-			//      'enabledbydefaulton' => 'Home',
-			//  ),
+			 0 => array(
+			     'file' => 'frotawidget1.php@frota',
+			     'note' => 'Widget provided by Frota',
+			     'enabledbydefaulton' => 'frota',
+			 ),
 			//  ...
 		);
 		/* END MODULEBUILDER WIDGETS */
@@ -276,79 +276,109 @@ class modFrota extends DolibarrModules
 		// Add here entries to declare new permissions
 		/* BEGIN MODULEBUILDER PERMISSIONS */
 		$this->rights[$r][0] = $this->numero . sprintf('%02d', (0 * 10) + 0 + 1);
-		$this->rights[$r][1] = 'Read Abastecimento object of Frota';
-		$this->rights[$r][4] = 'abastecimento';
-		$this->rights[$r][5] = 'read';
-		$r++;
-		$this->rights[$r][0] = $this->numero . sprintf('%02d', (0 * 10) + 1 + 1);
-		$this->rights[$r][1] = 'Create/Update Abastecimento object of Frota';
-		$this->rights[$r][4] = 'abastecimento';
-		$this->rights[$r][5] = 'write';
-		$r++;
-		$this->rights[$r][0] = $this->numero . sprintf('%02d', (1 * 10) + 0 + 1);
-		$this->rights[$r][1] = 'Read CompraCombustivel object of Frota';
-		$this->rights[$r][4] = 'compracombustivel';
-		$this->rights[$r][5] = 'read';
-		$r++;
-		$this->rights[$r][0] = $this->numero . sprintf('%02d', (1 * 10) + 1 + 1);
-		$this->rights[$r][1] = 'Create/Update CompraCombustivel object of Frota';
-		$this->rights[$r][4] = 'compracombustivel';
-		$this->rights[$r][5] = 'write';
-		$r++;
-		$this->rights[$r][0] = $this->numero . sprintf('%02d', (2 * 10) + 0 + 1);
 		$this->rights[$r][1] = 'Read Implemento object of Frota';
 		$this->rights[$r][4] = 'implemento';
 		$this->rights[$r][5] = 'read';
 		$r++;
-		$this->rights[$r][0] = $this->numero . sprintf('%02d', (2 * 10) + 1 + 1);
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (0 * 10) + 1 + 1);
 		$this->rights[$r][1] = 'Create/Update Implemento object of Frota';
 		$this->rights[$r][4] = 'implemento';
 		$this->rights[$r][5] = 'write';
 		$r++;
-		$this->rights[$r][0] = $this->numero . sprintf('%02d', (2 * 10) + 2 + 1);
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (0 * 10) + 2 + 1);
 		$this->rights[$r][1] = 'Delete Implemento object of Frota';
 		$this->rights[$r][4] = 'implemento';
 		$this->rights[$r][5] = 'delete';
 		$r++;
-		$this->rights[$r][0] = $this->numero . sprintf('%02d', (3 * 10) + 0 + 1);
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (1 * 10) + 0 + 1);
 		$this->rights[$r][1] = 'Read Manutencao object of Frota';
 		$this->rights[$r][4] = 'manutencao';
 		$this->rights[$r][5] = 'read';
 		$r++;
-		$this->rights[$r][0] = $this->numero . sprintf('%02d', (3 * 10) + 1 + 1);
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (1 * 10) + 1 + 1);
 		$this->rights[$r][1] = 'Create/Update Manutencao object of Frota';
 		$this->rights[$r][4] = 'manutencao';
 		$this->rights[$r][5] = 'write';
 		$r++;
-		$this->rights[$r][0] = $this->numero . sprintf('%02d', (4 * 10) + 0 + 1);
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (2 * 10) + 0 + 1);
 		$this->rights[$r][1] = 'Read Reservatorio object of Frota';
 		$this->rights[$r][4] = 'reservatorio';
 		$this->rights[$r][5] = 'read';
 		$r++;
-		$this->rights[$r][0] = $this->numero . sprintf('%02d', (4 * 10) + 1 + 1);
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (2 * 10) + 1 + 1);
 		$this->rights[$r][1] = 'Create/Update Reservatorio object of Frota';
 		$this->rights[$r][4] = 'reservatorio';
 		$this->rights[$r][5] = 'write';
 		$r++;
-		$this->rights[$r][0] = $this->numero . sprintf('%02d', (4 * 10) + 2 + 1);
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (2 * 10) + 2 + 1);
 		$this->rights[$r][1] = 'Delete Reservatorio object of Frota';
 		$this->rights[$r][4] = 'reservatorio';
 		$this->rights[$r][5] = 'delete';
 		$r++;
-		$this->rights[$r][0] = $this->numero . sprintf('%02d', (5 * 10) + 0 + 1);
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (3 * 10) + 0 + 1);
 		$this->rights[$r][1] = 'Read Veiculo object of Frota';
 		$this->rights[$r][4] = 'veiculo';
 		$this->rights[$r][5] = 'read';
 		$r++;
-		$this->rights[$r][0] = $this->numero . sprintf('%02d', (5 * 10) + 1 + 1);
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (3 * 10) + 1 + 1);
 		$this->rights[$r][1] = 'Create/Update Veiculo object of Frota';
 		$this->rights[$r][4] = 'veiculo';
 		$this->rights[$r][5] = 'write';
 		$r++;
-		$this->rights[$r][0] = $this->numero . sprintf('%02d', (5 * 10) + 2 + 1);
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (3 * 10) + 2 + 1);
 		$this->rights[$r][1] = 'Delete Veiculo object of Frota';
 		$this->rights[$r][4] = 'veiculo';
 		$this->rights[$r][5] = 'delete';
+		$r++;
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (4 * 10) + 1 + 1);
+		$this->rights[$r][1] = '';
+		$this->rights[$r][4] = '';
+		$this->rights[$r][5] = '';
+		$r++;
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (4 * 10) + 2 + 1);
+		$this->rights[$r][1] = '';
+		$this->rights[$r][4] = '';
+		$this->rights[$r][5] = '';
+		$r++;
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (5 * 10) + 0 + 1);
+		$this->rights[$r][1] = 'Read Seguro object of Frota';
+		$this->rights[$r][4] = 'seguro';
+		$this->rights[$r][5] = 'read';
+		$r++;
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (5 * 10) + 1 + 1);
+		$this->rights[$r][1] = 'Create/Update Seguro object of Frota';
+		$this->rights[$r][4] = 'seguro';
+		$this->rights[$r][5] = 'write';
+		$r++;
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (6 * 10) + 0 + 1);
+		$this->rights[$r][1] = 'Read Abastecimento object of Frota';
+		$this->rights[$r][4] = 'abastecimento';
+		$this->rights[$r][5] = 'read';
+		$r++;
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (6 * 10) + 1 + 1);
+		$this->rights[$r][1] = 'Create/Update Abastecimento object of Frota';
+		$this->rights[$r][4] = 'abastecimento';
+		$this->rights[$r][5] = 'write';
+		$r++;
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (7 * 10) + 0 + 1);
+		$this->rights[$r][1] = 'Read Aluguel object of Frota';
+		$this->rights[$r][4] = 'aluguel';
+		$this->rights[$r][5] = 'read';
+		$r++;
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (7 * 10) + 1 + 1);
+		$this->rights[$r][1] = 'Create/Update Aluguel object of Frota';
+		$this->rights[$r][4] = 'aluguel';
+		$this->rights[$r][5] = 'write';
+		$r++;
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (8 * 10) + 0 + 1);
+		$this->rights[$r][1] = 'Read CompraCombustivel object of Frota';
+		$this->rights[$r][4] = 'compracombustivel';
+		$this->rights[$r][5] = 'read';
+		$r++;
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', (8 * 10) + 1 + 1);
+		$this->rights[$r][1] = 'Create/Update CompraCombustivel object of Frota';
+		$this->rights[$r][4] = 'compracombustivel';
+		$this->rights[$r][5] = 'write';
 		$r++;
 		
 		/* END MODULEBUILDER PERMISSIONS */
@@ -375,233 +405,344 @@ class modFrota extends DolibarrModules
 		);
 		/* END MODULEBUILDER TOPMENU */
 		/* BEGIN MODULEBUILDER LEFTMENU MYOBJECT */
-		/*$this->menu[$r++]=array(
-			'fk_menu'=>'fk_mainmenu=frota',      // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'=>'left',                          // This is a Left menu entry
-			'titre'=>'Veiculo',
-			'prefix' => img_picto('', $this->picto, 'class="pictofixedwidth valignmiddle paddingright"'),
-			'mainmenu'=>'frota',
-			'leftmenu'=>'veiculo',
-			'url'=>'/frota/frotaindex.php',
-			'langs'=>'frota@frota',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position'=>1000+$r,
-			'enabled'=>'isModEnabled("frota")', // Define condition to show or hide menu entry. Use 'isModEnabled("frota")' if entry must be visible if module is enabled.
-			'perms'=>'$user->hasRight("frota", "veiculo", "read")',
-			'target'=>'',
-			'user'=>2,				                // 0=Menu for internal users, 1=external users, 2=both
-		);
+		/* LEFTMENU VEICULO */
 		$this->menu[$r++]=array(
-			'fk_menu'=>'fk_mainmenu=frota,fk_leftmenu=veiculo',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'=>'left',			                // This is a Left menu entry
-			'titre'=>'List_Veiculo',
-			'mainmenu'=>'frota',
-			'leftmenu'=>'frota_veiculo_list',
-			'url'=>'/frota/veiculo_list.php',
-			'langs'=>'frota@frota',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position'=>1000+$r,
-			'enabled'=>'isModEnabled("frota")', // Define condition to show or hide menu entry. Use 'isModEnabled("frota")' if entry must be visible if module is enabled.
-			'perms'=>'$user->hasRight("frota", "veiculo", "read")'
-			'target'=>'',
-			'user'=>2,				                // 0=Menu for internal users, 1=external users, 2=both
+			 'fk_menu' => 'fk_mainmenu=frota',
+			 'type' => 'left',
+			 'titre' => 'Veiculo',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'veiculo',
+			 'url' => '/frota/veiculo_list.php',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'veiculo\', \'read\')',
+			 'target' => '',
+			 'user' => 2,
 		);
+		/* END LEFTMENU VEICULO */
+		/* LEFTMENU LISTA VEICULO */
 		$this->menu[$r++]=array(
-			'fk_menu'=>'fk_mainmenu=frota,fk_leftmenu=veiculo',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'=>'left',			                // This is a Left menu entry
-			'titre'=>'New_Veiculo',
-			'mainmenu'=>'frota',
-			'leftmenu'=>'frota_veiculo_new',
-			'url'=>'/frota/veiculo_card.php?action=create',
-			'langs'=>'frota@frota',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position'=>1000+$r,
-			'enabled'=>'isModEnabled("frota")', // Define condition to show or hide menu entry. Use 'isModEnabled("frota")' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'perms'=>'$user->hasRight("frota", "veiculo", "write")'
-			'target'=>'',
-			'user'=>2,				                // 0=Menu for internal users, 1=external users, 2=both
-		);*/
-		/*LEFTMENU VEICULO*/
-		$this->menu[$r++]=array(
-			'fk_menu'=>'fk_mainmenu=frota',
-			'type'=>'left',
-			'titre'=>'Veiculo',
-			'prefix' => img_picto('', $this->picto, 'class="paddingright pictofixedwidth valignmiddle"'),
-			'mainmenu'=>'frota',
-			'leftmenu'=>'veiculo',
-			'url'=>'/frota/veiculo_list.php',
-			'langs'=>'frota@frota',
-			'position'=>1000 + $r,
-			'enabled'=>'isModEnabled("frota")',
-			'perms'=>'$user->hasRight("frota", "veiculo", "read")',
-			'target'=>'',
-			'user'=>2,
+			 'fk_menu' => 'fk_mainmenu=frota,fk_leftmenu=veiculo',
+			 'type' => 'left',
+			 'titre' => 'Lista Veiculo',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'frota_veiculo_list',
+			 'url' => '/frota/veiculo_list.php',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'veiculo\', \'read\')',
+			 'target' => '',
+			 'user' => 2,
 		);
-        $this->menu[$r++]=array(
-            'fk_menu'=>'fk_mainmenu=frota,fk_leftmenu=veiculo',
-            'type'=>'left',
-            'titre'=>'List Veiculo',
-            'mainmenu'=>'frota',
-            'leftmenu'=>'frota_veiculo_list',
-            'url'=>'/frota/veiculo_list.php',
-            'langs'=>'frota@frota',
-            'position'=>1000 + $r,
-            'enabled'=>'isModEnabled("frota")',
-			'perms'=>'$user->hasRight("frota", "veiculo", "read")',
-            'target'=>'',
-            'user'=>2,
-        );
-        $this->menu[$r++]=array(
-            'fk_menu'=>'fk_mainmenu=frota,fk_leftmenu=veiculo',
-            'type'=>'left',
-            'titre'=>'New Veiculo',
-            'mainmenu'=>'frota',
-            'leftmenu'=>'frota_veiculo_new',
-            'url'=>'/frota/veiculo_card.php?action=create',
-            'langs'=>'frota@frota',
-            'position'=>1000 + $r,
-            'enabled'=>'isModEnabled("frota")',
-			'perms'=>'$user->hasRight("frota", "veiculo", "write")',
-            'target'=>'',
-            'user'=>2
-        );
+		/* END LEFTMENU LISTA VEICULO */
+		/* LEFTMENU NOVO VEICULO */
+		$this->menu[$r++]=array(
+			 'fk_menu' => 'fk_mainmenu=frota,fk_leftmenu=veiculo',
+			 'type' => 'left',
+			 'titre' => 'Novo Veiculo',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'frota_veiculo_new',
+			 'url' => '/frota/veiculo_card.php?action=create',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'veiculo\', \'write\')',
+			 'target' => '',
+			 'user' => 2,
+		);
+		/* END LEFTMENU NOVO VEICULO */
+		/* LEFTMENU IMPLEMENTO */
+		$this->menu[$r++]=array(
+			 'fk_menu' => 'fk_mainmenu=frota',
+			 'type' => 'left',
+			 'titre' => 'Implemento',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'implemento',
+			 'url' => '/frota/implemento_list.php',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'implemento\', \'read\')',
+			 'target' => '',
+			 'user' => 2,
+		);
+		/* END LEFTMENU IMPLEMENTO */
+		/* LEFTMENU LISTA IMPLEMENTO */
+		$this->menu[$r++]=array(
+			 'fk_menu' => 'fk_mainmenu=frota,fk_leftmenu=implemento',
+			 'type' => 'left',
+			 'titre' => 'Lista Implemento',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'frota_implemento_list',
+			 'url' => '/frota/implemento_list.php',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'implemento\', \'read\')',
+			 'target' => '',
+			 'user' => 2,
+		);
+		/* END LEFTMENU LISTA IMPLEMENTO */
+		/* LEFTMENU NOVO IMPLEMENTO */
+		$this->menu[$r++]=array(
+			 'fk_menu' => 'fk_mainmenu=frota,fk_leftmenu=implemento',
+			 'type' => 'left',
+			 'titre' => 'Novo Implemento',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'frota_implemento_new',
+			 'url' => '/frota/implemento_card.php?action=create',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'implemento\', \'write\')',
+			 'target' => '',
+			 'user' => 2,
+		);
+		/* END LEFTMENU NOVO IMPLEMENTO */
+		/* LEFTMENU RESERVATORIO */
+		$this->menu[$r++]=array(
+			 'fk_menu' => 'fk_mainmenu=frota',
+			 'type' => 'left',
+			 'titre' => 'Reservatorio',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'reservatorio',
+			 'url' => '/frota/reservatorio_list.php',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'reservatorio\', \'read\')',
+			 'target' => '',
+			 'user' => 2,
+		);
+		/* END LEFTMENU RESERVATORIO */
+		/* LEFTMENU LISTA RESERVATORIO */
+		$this->menu[$r++]=array(
+			 'fk_menu' => 'fk_mainmenu=frota,fk_leftmenu=reservatorio',
+			 'type' => 'left',
+			 'titre' => 'Lista Reservatorio',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'frota_reservatorio_list',
+			 'url' => '/frota/reservatorio_list.php',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'reservatorio\', \'read\')',
+			 'target' => '',
+			 'user' => 2,
+		);
+		/* END LEFTMENU LISTA RESERVATORIO */
+		/* LEFTMENU NOVO RESERVATORIO */
+		$this->menu[$r++]=array(
+			 'fk_menu' => 'fk_mainmenu=frota,fk_leftmenu=reservatorio',
+			 'type' => 'left',
+			 'titre' => 'Novo Reservatorio',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'frota_reservatorio_new',
+			 'url' => '/frota/reservatorio_card.php?action=create',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'reservatorio\', \'write\')',
+			 'target' => '',
+			 'user' => 2,
+		);
+		/* END LEFTMENU NOVO RESERVATORIO */
+		/* LEFTMENU MANUTENCAO */
+		$this->menu[$r++]=array(
+			 'fk_menu' => 'fk_mainmenu=frota',
+			 'type' => 'left',
+			 'titre' => 'Manutencao',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'manutencao',
+			 'url' => '/frota/manutencao_list.php',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'manutencao\', \'read\')',
+			 'target' => '',
+			 'user' => 2,
+		);
+		/* END LEFTMENU MANUTENCAO */
+		/* LEFTMENU LISTA MANUTENçãO */
+		$this->menu[$r++]=array(
+			 'fk_menu' => 'fk_mainmenu=frota,fk_leftmenu=manutencao',
+			 'type' => 'left',
+			 'titre' => 'Lista Manutenção',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'frota_manutencao_list',
+			 'url' => '/frota/manutencao_list.php',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'manutencao\', \'read\')',
+			 'target' => '',
+			 'user' => 2,
+		);
+		/* END LEFTMENU LISTA MANUTENçãO */
+		/* LEFTMENU NOVA MANUTENCAO */
+		$this->menu[$r++]=array(
+			 'fk_menu' => 'fk_mainmenu=frota,fk_leftmenu=manutencao',
+			 'type' => 'left',
+			 'titre' => 'Nova Manutencao',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'frota_manutencao_new',
+			 'url' => '/frota/manutencao_card.php?action=create',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'manutencao\', \'write\')',
+			 'target' => '',
+			 'user' => 2,
+		);
+		/* END LEFTMENU NOVA MANUTENCAO */
+		/* LEFTMENU SEGURO */
+		$this->menu[$r++]=array(
+			 'fk_menu' => 'fk_mainmenu=frota',
+			 'type' => 'left',
+			 'titre' => 'Seguro',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'seguro',
+			 'url' => '/frota/seguro_list.php',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'seguro\', \'read\')',
+			 'target' => '',
+			 'user' => 2,
+		);
+		/* END LEFTMENU SEGURO */
+		/* LEFTMENU LIST SEGURO */
+		$this->menu[$r++]=array(
+			 'fk_menu' => 'fk_mainmenu=frota,fk_leftmenu=seguro',
+			 'type' => 'left',
+			 'titre' => 'List Seguro',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'frota_seguro_list',
+			 'url' => '/frota/seguro_list.php',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'seguro\', \'read\')',
+			 'target' => '',
+			 'user' => 2,
+		);
+		/* END LEFTMENU LIST SEGURO */
+		/* LEFTMENU NEW SEGURO */
+		$this->menu[$r++]=array(
+			 'fk_menu' => 'fk_mainmenu=frota,fk_leftmenu=seguro',
+			 'type' => 'left',
+			 'titre' => 'New Seguro',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'frota_seguro_new',
+			 'url' => '/frota/seguro_card.php?action=create',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'seguro\', \'write\')',
+			 'target' => '',
+			 'user' => 2,
+		);
+		/* END LEFTMENU NEW SEGURO */
+		/* LEFTMENU ABASTECIMENTO */
+		$this->menu[$r++]=array(
+			 'fk_menu' => 'fk_mainmenu=frota',
+			 'type' => 'left',
+			 'titre' => 'Abastecimento',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'abastecimento',
+			 'url' => '/frota/abastecimento_list.php',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'abastecimento\', \'read\')',
+			 'target' => '',
+			 'user' => 2,
+		);
+		/* END LEFTMENU ABASTECIMENTO */
+		/* LEFTMENU LIST ABASTECIMENTO */
+		$this->menu[$r++]=array(
+			 'fk_menu' => 'fk_mainmenu=frota,fk_leftmenu=abastecimento',
+			 'type' => 'left',
+			 'titre' => 'List Abastecimento',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'frota_abastecimento_list',
+			 'url' => '/frota/abastecimento_list.php',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'abastecimento\', \'read\')',
+			 'target' => '',
+			 'user' => 2,
+		);
+		/* END LEFTMENU LIST ABASTECIMENTO */
+		/* LEFTMENU NEW ABASTECIMENTO */
+		$this->menu[$r++]=array(
+			 'fk_menu' => 'fk_mainmenu=frota,fk_leftmenu=abastecimento',
+			 'type' => 'left',
+			 'titre' => 'New Abastecimento',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'frota_abastecimento_new',
+			 'url' => '/frota/abastecimento_card.php?action=create',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'abastecimento\', \'write\')',
+			 'target' => '',
+			 'user' => 2,
+		);
+		/* END LEFTMENU NEW ABASTECIMENTO */
+		/* LEFTMENU ALUGUEL */
+		$this->menu[$r++]=array(
+			 'fk_menu' => 'fk_mainmenu=frota',
+			 'type' => 'left',
+			 'titre' => 'Aluguel',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'aluguel',
+			 'url' => '/frota/aluguel_list.php',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'aluguel\', \'read\')',
+			 'target' => '',
+			 'user' => 2,
+		);
+		/* END LEFTMENU ALUGUEL */
+		/* LEFTMENU LIST ALUGUEL */
+		$this->menu[$r++]=array(
+			 'fk_menu' => 'fk_mainmenu=frota,fk_leftmenu=aluguel',
+			 'type' => 'left',
+			 'titre' => 'List Aluguel',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'frota_aluguel_list',
+			 'url' => '/frota/aluguel_list.php',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'aluguel\', \'read\')',
+			 'target' => '',
+			 'user' => 2,
+		);
+		/* END LEFTMENU LIST ALUGUEL */
+		/* LEFTMENU NEW ALUGUEL */
+		$this->menu[$r++]=array(
+			 'fk_menu' => 'fk_mainmenu=frota,fk_leftmenu=aluguel',
+			 'type' => 'left',
+			 'titre' => 'New Aluguel',
+			 'mainmenu' => 'frota',
+			 'leftmenu' => 'frota_aluguel_new',
+			 'url' => '/frota/aluguel_card.php?action=create',
+			 'langs' => 'frota@frota',
+			 'position' => 1000 + $r,
+			 'enabled' => 'isModEnabled(\'frota\')',
+			 'perms' => '$user->hasRight(\'frota\', \'aluguel\', \'write\')',
+			 'target' => '',
+			 'user' => 2,
+		);
+		/* END LEFTMENU NEW ALUGUEL */
 
-		/*END LEFTMENU VEICULO*/
-		/*LEFTMENU IMPLEMENTO*/
-		$this->menu[$r++]=array(
-			'fk_menu'=>'fk_mainmenu=frota',
-			'type'=>'left',
-			'titre'=>'Implemento',
-			'prefix' => img_picto('', $this->picto, 'class="paddingright pictofixedwidth valignmiddle"'),
-			'mainmenu'=>'frota',
-			'leftmenu'=>'implemento',
-			'url'=>'/frota/implemento_list.php',
-			'langs'=>'frota@frota',
-			'position'=>1000 + $r,
-			'enabled'=>'isModEnabled("frota")',
-			'perms'=>'$user->hasRight("frota", "implemento", "read")',
-			'target'=>'',
-			'user'=>2,
-		);
-        $this->menu[$r++]=array(
-            'fk_menu'=>'fk_mainmenu=frota,fk_leftmenu=implemento',
-            'type'=>'left',
-            'titre'=>'List Implemento',
-            'mainmenu'=>'frota',
-            'leftmenu'=>'frota_implemento_list',
-            'url'=>'/frota/implemento_list.php',
-            'langs'=>'frota@frota',
-            'position'=>1000 + $r,
-            'enabled'=>'isModEnabled("frota")',
-			'perms'=>'$user->hasRight("frota", "implemento", "read")',
-            'target'=>'',
-            'user'=>2,
-        );
-        $this->menu[$r++]=array(
-            'fk_menu'=>'fk_mainmenu=frota,fk_leftmenu=implemento',
-            'type'=>'left',
-            'titre'=>'New Implemento',
-            'mainmenu'=>'frota',
-            'leftmenu'=>'frota_implemento_new',
-            'url'=>'/frota/implemento_card.php?action=create',
-            'langs'=>'frota@frota',
-            'position'=>1000 + $r,
-            'enabled'=>'isModEnabled("frota")',
-			'perms'=>'$user->hasRight("frota", "implemento", "write")',
-            'target'=>'',
-            'user'=>2
-        );
 
-		/*END LEFTMENU IMPLEMENTO*/
-		/*LEFTMENU RESERVATORIO*/
-		$this->menu[$r++]=array(
-			'fk_menu'=>'fk_mainmenu=frota',
-			'type'=>'left',
-			'titre'=>'Reservatorio',
-			'prefix' => img_picto('', $this->picto, 'class="paddingright pictofixedwidth valignmiddle"'),
-			'mainmenu'=>'frota',
-			'leftmenu'=>'reservatorio',
-			'url'=>'/frota/reservatorio_list.php',
-			'langs'=>'frota@frota',
-			'position'=>1000 + $r,
-			'enabled'=>'isModEnabled("frota")',
-			'perms'=>'$user->hasRight("frota", "reservatorio", "read")',
-			'target'=>'',
-			'user'=>2,
-		);
-        $this->menu[$r++]=array(
-            'fk_menu'=>'fk_mainmenu=frota,fk_leftmenu=reservatorio',
-            'type'=>'left',
-            'titre'=>'List Reservatorio',
-            'mainmenu'=>'frota',
-            'leftmenu'=>'frota_reservatorio_list',
-            'url'=>'/frota/reservatorio_list.php',
-            'langs'=>'frota@frota',
-            'position'=>1000 + $r,
-            'enabled'=>'isModEnabled("frota")',
-			'perms'=>'$user->hasRight("frota", "reservatorio", "read")',
-            'target'=>'',
-            'user'=>2,
-        );
-        $this->menu[$r++]=array(
-            'fk_menu'=>'fk_mainmenu=frota,fk_leftmenu=reservatorio',
-            'type'=>'left',
-            'titre'=>'New Reservatorio',
-            'mainmenu'=>'frota',
-            'leftmenu'=>'frota_reservatorio_new',
-            'url'=>'/frota/reservatorio_card.php?action=create',
-            'langs'=>'frota@frota',
-            'position'=>1000 + $r,
-            'enabled'=>'isModEnabled("frota")',
-			'perms'=>'$user->hasRight("frota", "reservatorio", "write")',
-            'target'=>'',
-            'user'=>2
-        );
-
-		/*END LEFTMENU RESERVATORIO*/
-		/*LEFTMENU ABASTECIMENTO*/
-		$this->menu[$r++]=array(
-			'fk_menu'=>'fk_mainmenu=frota',
-			'type'=>'left',
-			'titre'=>'Abastecimento',
-			'prefix' => img_picto('', $this->picto, 'class="paddingright pictofixedwidth valignmiddle"'),
-			'mainmenu'=>'frota',
-			'leftmenu'=>'abastecimento',
-			'url'=>'/frota/abastecimento_list.php',
-			'langs'=>'frota@frota',
-			'position'=>1000 + $r,
-			'enabled'=>'isModEnabled("frota")',
-			'perms'=>'$user->hasRight("frota", "abastecimento", "read")',
-			'target'=>'',
-			'user'=>2,
-		);
-        $this->menu[$r++]=array(
-            'fk_menu'=>'fk_mainmenu=frota,fk_leftmenu=abastecimento',
-            'type'=>'left',
-            'titre'=>'List Abastecimento',
-            'mainmenu'=>'frota',
-            'leftmenu'=>'frota_abastecimento_list',
-            'url'=>'/frota/abastecimento_list.php',
-            'langs'=>'frota@frota',
-            'position'=>1000 + $r,
-            'enabled'=>'isModEnabled("frota")',
-			'perms'=>'$user->hasRight("frota", "abastecimento", "read")',
-            'target'=>'',
-            'user'=>2,
-        );
-        $this->menu[$r++]=array(
-            'fk_menu'=>'fk_mainmenu=frota,fk_leftmenu=abastecimento',
-            'type'=>'left',
-            'titre'=>'New Abastecimento',
-            'mainmenu'=>'frota',
-            'leftmenu'=>'frota_abastecimento_new',
-            'url'=>'/frota/abastecimento_card.php?action=create',
-            'langs'=>'frota@frota',
-            'position'=>1000 + $r,
-            'enabled'=>'isModEnabled("frota")',
-			'perms'=>'$user->hasRight("frota", "abastecimento", "write")',
-            'target'=>'',
-            'user'=>2
-        );
-
-		/*END LEFTMENU ABASTECIMENTO*/
 		/*LEFTMENU COMPRACOMBUSTIVEL*/
 		$this->menu[$r++]=array(
 			'fk_menu'=>'fk_mainmenu=frota',
@@ -648,52 +789,6 @@ class modFrota extends DolibarrModules
         );
 
 		/*END LEFTMENU COMPRACOMBUSTIVEL*/
-		/*LEFTMENU MANUTENCAO*/
-		$this->menu[$r++]=array(
-			'fk_menu'=>'fk_mainmenu=frota',
-			'type'=>'left',
-			'titre'=>'Manutencao',
-			'prefix' => img_picto('', $this->picto, 'class="paddingright pictofixedwidth valignmiddle"'),
-			'mainmenu'=>'frota',
-			'leftmenu'=>'manutencao',
-			'url'=>'/frota/manutencao_list.php',
-			'langs'=>'frota@frota',
-			'position'=>1000 + $r,
-			'enabled'=>'isModEnabled("frota")',
-			'perms'=>'$user->hasRight("frota", "manutencao", "read")',
-			'target'=>'',
-			'user'=>2,
-		);
-        $this->menu[$r++]=array(
-            'fk_menu'=>'fk_mainmenu=frota,fk_leftmenu=manutencao',
-            'type'=>'left',
-            'titre'=>'List Manutencao',
-            'mainmenu'=>'frota',
-            'leftmenu'=>'frota_manutencao_list',
-            'url'=>'/frota/manutencao_list.php',
-            'langs'=>'frota@frota',
-            'position'=>1000 + $r,
-            'enabled'=>'isModEnabled("frota")',
-			'perms'=>'$user->hasRight("frota", "manutencao", "read")',
-            'target'=>'',
-            'user'=>2,
-        );
-        $this->menu[$r++]=array(
-            'fk_menu'=>'fk_mainmenu=frota,fk_leftmenu=manutencao',
-            'type'=>'left',
-            'titre'=>'New Manutencao',
-            'mainmenu'=>'frota',
-            'leftmenu'=>'frota_manutencao_new',
-            'url'=>'/frota/manutencao_card.php?action=create',
-            'langs'=>'frota@frota',
-            'position'=>1000 + $r,
-            'enabled'=>'isModEnabled("frota")',
-			'perms'=>'$user->hasRight("frota", "manutencao", "write")',
-            'target'=>'',
-            'user'=>2
-        );
-
-		/*END LEFTMENU MANUTENCAO*/
 		/* END MODULEBUILDER LEFTMENU MYOBJECT */
 		// Exports profiles provided by this module
 		$r = 1;

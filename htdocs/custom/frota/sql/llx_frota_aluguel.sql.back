@@ -14,11 +14,26 @@
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
 
--- BEGIN MODULEBUILDER INDEXES
-ALTER TABLE llx_frota_reservatorio ADD INDEX idx_frota_reservatorio_tipo (tipo);
--- END MODULEBUILDER INDEXES
-
---ALTER TABLE llx_frota_reservatorio ADD UNIQUE INDEX uk_frota_reservatorio_fieldxy(fieldx, fieldy);
-
---ALTER TABLE llx_frota_reservatorio ADD CONSTRAINT llx_frota_reservatorio_fk_field FOREIGN KEY (fk_field) REFERENCES llx_frota_myotherobject(rowid);
-
+CREATE TABLE llx_frota_aluguel(
+	-- BEGIN MODULEBUILDER FIELDS
+	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
+	ref varchar(128) NOT NULL, 
+	label varchar(255), 
+	amount double DEFAULT NULL, 
+	fk_soc integer, 
+	fk_project integer, 
+	description text, 
+	note_public text, 
+	note_private text, 
+	date_creation datetime NOT NULL, 
+	tms timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
+	fk_user_creat integer NOT NULL, 
+	fk_user_modif integer, 
+	last_main_doc varchar(255), 
+	import_key varchar(14), 
+	model_pdf varchar(255), 
+	status integer NOT NULL, 
+	veiculo integer NOT NULL, 
+	inicio date
+	-- END MODULEBUILDER FIELDS
+) ENGINE=innodb;

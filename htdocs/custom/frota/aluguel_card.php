@@ -17,9 +17,9 @@
  */
 
 /**
- *    \file       compracombustivel_card.php
+ *    \file       aluguel_card.php
  *    \ingroup    frota
- *    \brief      Page to create/edit/view compracombustivel
+ *    \brief      Page to create/edit/view aluguel
  */
 
 
@@ -80,8 +80,8 @@ if (!$res) {
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
-dol_include_once('/frota/class/compracombustivel.class.php');
-dol_include_once('/frota/lib/frota_compracombustivel.lib.php');
+dol_include_once('/frota/class/aluguel.class.php');
+dol_include_once('/frota/lib/frota_aluguel.lib.php');
 
 // Load translation files required by the page
 $langs->loadLangs(array("frota@frota", "other"));
@@ -106,7 +106,7 @@ if (!empty($backtopagejsfields)) {
 }
 
 // Initialize technical objects
-$object = new CompraCombustivel($db);
+$object = new Aluguel($db);
 $extrafields = new ExtraFields($db);
 $diroutputmassaction = $conf->frota->dir_output.'/temp/massgeneration/'.$user->id;
 $hookmanager->initHooks(array($object->element.'card', 'globalcard')); // Note that conf->hooks_modules contains array
@@ -136,11 +136,11 @@ include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php'; // Must be includ
 // Set $enablepermissioncheck to 1 to enable a minimum low level of checks
 $enablepermissioncheck = 0;
 if ($enablepermissioncheck) {
-	$permissiontoread = $user->hasRight('frota', 'compracombustivel', 'read');
-	$permissiontoadd = $user->hasRight('frota', 'compracombustivel', 'write'); // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
-	$permissiontodelete = $user->hasRight('frota', 'compracombustivel', 'delete') || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
-	$permissionnote = $user->hasRight('frota', 'compracombustivel', 'write'); // Used by the include of actions_setnotes.inc.php
-	$permissiondellink = $user->hasRight('frota', 'compracombustivel', 'write'); // Used by the include of actions_dellink.inc.php
+	$permissiontoread = $user->hasRight('frota', 'aluguel', 'read');
+	$permissiontoadd = $user->hasRight('frota', 'aluguel', 'write'); // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
+	$permissiontodelete = $user->hasRight('frota', 'aluguel', 'delete') || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
+	$permissionnote = $user->hasRight('frota', 'aluguel', 'write'); // Used by the include of actions_setnotes.inc.php
+	$permissiondellink = $user->hasRight('frota', 'aluguel', 'write'); // Used by the include of actions_dellink.inc.php
 } else {
 	$permissiontoread = 1;
 	$permissiontoadd = 1; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
@@ -149,7 +149,7 @@ if ($enablepermissioncheck) {
 	$permissiondellink = 1;
 }
 
-$upload_dir = $conf->frota->multidir_output[isset($object->entity) ? $object->entity : 1].'/compracombustivel';
+$upload_dir = $conf->frota->multidir_output[isset($object->entity) ? $object->entity : 1].'/aluguel';
 
 // Security check (enable the most restrictive one)
 //if ($user->socid > 0) accessforbidden();
@@ -177,14 +177,14 @@ if ($reshook < 0) {
 if (empty($reshook)) {
 	$error = 0;
 
-	$backurlforlist = dol_buildpath('/frota/compracombustivel_list.php', 1);
+	$backurlforlist = dol_buildpath('/frota/aluguel_list.php', 1);
 
 	if (empty($backtopage) || ($cancel && empty($id))) {
 		if (empty($backtopage) || ($cancel && strpos($backtopage, '__ID__'))) {
 			if (empty($id) && (($action != 'add' && $action != 'create') || $cancel)) {
 				$backtopage = $backurlforlist;
 			} else {
-				$backtopage = dol_buildpath('/frota/compracombustivel_card.php', 1).'?id='.((!empty($id) && $id > 0) ? $id : '__ID__');
+				$backtopage = dol_buildpath('/frota/aluguel_card.php', 1).'?id='.((!empty($id) && $id > 0) ? $id : '__ID__');
 			}
 		}
 	}
@@ -216,7 +216,7 @@ if (empty($reshook)) {
 	// Actions to send emails
 	$triggersendname = 'FROTA_MYOBJECT_SENTBYMAIL';
 	$autocopy = 'MAIN_MAIL_AUTOCOPY_MYOBJECT_TO';
-	$trackid = 'compracombustivel'.$object->id;
+	$trackid = 'aluguel'.$object->id;
 	include DOL_DOCUMENT_ROOT.'/core/actions_sendmails.inc.php';
 }
 
@@ -231,10 +231,10 @@ $form = new Form($db);
 $formfile = new FormFile($db);
 $formproject = new FormProjets($db);
 
-$title = $langs->trans("CompraCombustivel")." - ".$langs->trans('Card');
+$title = $langs->trans("Aluguel")." - ".$langs->trans('Card');
 //$title = $object->ref." - ".$langs->trans('Card');
 if ($action == 'create') {
-	$title = $langs->trans("NewObject", $langs->transnoentitiesnoconv("CompraCombustivel"));
+	$title = $langs->trans("NewObject", $langs->transnoentitiesnoconv("Aluguel"));
 }
 $help_url = '';
 
@@ -306,7 +306,7 @@ if ($action == 'create') {
 
 // Part to edit record
 if (($id || $ref) && $action == 'edit') {
-	print load_fiche_titre($langs->trans("CompraCombustivel"), '', 'object_'.$object->picto);
+	print load_fiche_titre($langs->trans("Aluguel"), '', 'object_'.$object->picto);
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
@@ -340,15 +340,15 @@ if (($id || $ref) && $action == 'edit') {
 
 // Part to show record
 if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'create'))) {
-	$head = compracombustivelPrepareHead($object);
+	$head = aluguelPrepareHead($object);
 
-	print dol_get_fiche_head($head, 'card', $langs->trans("CompraCombustivel"), -1, $object->picto, 0, '', '', 0, '', 1);
+	print dol_get_fiche_head($head, 'card', $langs->trans("Aluguel"), -1, $object->picto, 0, '', '', 0, '', 1);
 
 	$formconfirm = '';
 
 	// Confirmation to delete (using preloaded confirm popup)
 	if ($action == 'delete' || ($conf->use_javascript_ajax && empty($conf->dol_use_jmobile))) {
-		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('DeleteCompraCombustivel'), $langs->trans('ConfirmDeleteObject'), 'confirm_delete', '', 0, 'action-delete');
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('DeleteAluguel'), $langs->trans('ConfirmDeleteObject'), 'confirm_delete', '', 0, 'action-delete');
 	}
 	// Confirmation to delete line
 	if ($action == 'deleteline') {
@@ -364,7 +364,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	// Confirmation of action xxxx (You can use it for xxx = 'close', xxx = 'reopen', ...)
 	if ($action == 'xxx') {
-		$text = $langs->trans('ConfirmActionCompraCombustivel', $object->ref);
+		$text = $langs->trans('ConfirmActionAluguel', $object->ref);
 		/*if (isModEnabled('notification'))
 		{
 			require_once DOL_DOCUMENT_ROOT . '/core/class/notify.class.php';
@@ -403,7 +403,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	// Object card
 	// ------------------------------------------------------------
-	$linkback = '<a href="'.dol_buildpath('/frota/compracombustivel_list.php', 1).'?restore_lastsearch_values=1'.(!empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
+	$linkback = '<a href="'.dol_buildpath('/frota/aluguel_list.php', 1).'?restore_lastsearch_values=1'.(!empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
 
 	$morehtmlref = '<div class="refidno">';
 	/*
@@ -610,11 +610,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			$urlsource = $_SERVER["PHP_SELF"]."?id=".$object->id;
 			$genallowed = $permissiontoread; // If you can read, you can build the PDF to read content
 			$delallowed = $permissiontoadd; // If you can create/edit, you can remove a file on card
-			print $formfile->showdocuments('frota:CompraCombustivel', $object->element.'/'.$objref, $filedir, $urlsource, $genallowed, $delallowed, $object->model_pdf, 1, 0, 0, 28, 0, '', '', '', $langs->defaultlang);
+			print $formfile->showdocuments('frota:Aluguel', $object->element.'/'.$objref, $filedir, $urlsource, $genallowed, $delallowed, $object->model_pdf, 1, 0, 0, 28, 0, '', '', '', $langs->defaultlang);
 		}
 
 		// Show links to link elements
-		$linktoelem = $form->showLinkToObjectBlock($object, null, array('compracombustivel'));
+		$linktoelem = $form->showLinkToObjectBlock($object, null, array('aluguel'));
 		$somethingshown = $form->showLinkedObjectBlock($object, $linktoelem);
 
 
@@ -622,7 +622,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 		$MAXEVENT = 10;
 
-		$morehtmlcenter = dolGetButtonTitle($langs->trans('SeeAll'), '', 'fa fa-bars imgforviewmode', dol_buildpath('/frota/compracombustivel_agenda.php', 1).'?id='.$object->id);
+		$morehtmlcenter = dolGetButtonTitle($langs->trans('SeeAll'), '', 'fa fa-bars imgforviewmode', dol_buildpath('/frota/aluguel_agenda.php', 1).'?id='.$object->id);
 
 		// List of actions on element
 		include_once DOL_DOCUMENT_ROOT.'/core/class/html.formactions.class.php';
@@ -638,10 +638,10 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	}
 
 	// Presend form
-	$modelmail = 'compracombustivel';
+	$modelmail = 'aluguel';
 	$defaulttopic = 'InformationMessage';
 	$diroutput = $conf->frota->dir_output;
-	$trackid = 'compracombustivel'.$object->id;
+	$trackid = 'aluguel'.$object->id;
 
 	include DOL_DOCUMENT_ROOT.'/core/tpl/card_presend.tpl.php';
 }

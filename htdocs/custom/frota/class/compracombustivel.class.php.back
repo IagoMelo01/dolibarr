@@ -109,29 +109,99 @@ class CompraCombustivel extends CommonObject
 	 */
 
 	// BEGIN MODULEBUILDER PROPERTIES
-public $fields=array(
-'rowid'=>array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>1, 'visible'=>-1, 'notnull'=>1, 'position'=>10),
-'ref'=>array('type'=>'varchar(128)', 'label'=>'Ref', 'enabled'=>1, 'visible'=>-1, 'notnull'=>1, 'showoncombobox'=>1, 'position'=>15, 'csslist'=>'tdoverflowmax150'),
-'label'=>array('type'=>'varchar(255)', 'label'=>'Label', 'enabled'=>1, 'visible'=>-1, 'alwayseditable'=>1, 'position'=>20, 'css'=>'minwidth300', 'cssview'=>'wordbreak', 'csslist'=>'tdoverflowmax150'),
-'amount'=>array('type'=>'double', 'label'=>'Amount', 'enabled'=>1, 'visible'=>-1, 'alwayseditable'=>1, 'position'=>25),
-'qty'=>array('type'=>'double', 'label'=>'Qty', 'enabled'=>1, 'visible'=>-1, 'alwayseditable'=>1, 'position'=>30),
-'fk_soc'=>array('type'=>'integer:Societe:societe/class/societe.class.php', 'label'=>'ThirdParty', 'enabled'=>1, 'visible'=>-1, 'alwayseditable'=>1, 'position'=>35, 'picto'=>'company', 'css'=>'maxwidth500 widthcentpercentminusxx', 'csslist'=>'tdoverflowmax150'),
-'fk_project'=>array('type'=>'integer:Project:projet/class/project.class.php:1:fk_statut=1', 'label'=>'Fkproject', 'enabled'=>1, 'visible'=>-1, 'alwayseditable'=>1, 'position'=>40, 'picto'=>'project', 'css'=>'maxwidth500 widthcentpercentminusxx', 'csslist'=>'tdoverflowmax150'),
-'description'=>array('type'=>'text', 'label'=>'Description', 'enabled'=>1, 'visible'=>-1, 'alwayseditable'=>1, 'position'=>45),
-'note_public'=>array('type'=>'text', 'label'=>'NotePrivate', 'enabled'=>1, 'visible'=>0, 'alwayseditable'=>1, 'position'=>50, 'cssview'=>'wordbreak'),
-'note_private'=>array('type'=>'text', 'label'=>'NotePublic', 'enabled'=>1, 'visible'=>0, 'alwayseditable'=>1, 'position'=>55, 'cssview'=>'wordbreak'),
-'date_creation'=>array('type'=>'datetime', 'label'=>'Datecreation', 'enabled'=>1, 'visible'=>-1, 'notnull'=>1, 'alwayseditable'=>1, 'position'=>60),
-'tms'=>array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>1, 'visible'=>-1, 'notnull'=>1, 'alwayseditable'=>1, 'position'=>65),
-'fk_user_creat'=>array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>1, 'visible'=>-2, 'notnull'=>1, 'alwayseditable'=>1, 'position'=>70, 'css'=>'maxwidth500 widthcentpercentminusxx', 'csslist'=>'tdoverflowmax150'),
-'fk_user_modif'=>array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModif', 'enabled'=>1, 'visible'=>-2, 'notnull'=>-1, 'alwayseditable'=>1, 'position'=>75, 'css'=>'maxwidth500 widthcentpercentminusxx', 'csslist'=>'tdoverflowmax150'),
-'last_main_doc'=>array('type'=>'varchar(255)', 'label'=>'Lastmaindoc', 'enabled'=>1, 'visible'=>-1, 'alwayseditable'=>1, 'position'=>80),
-'import_key'=>array('type'=>'varchar(14)', 'label'=>'ImportId', 'enabled'=>1, 'visible'=>-2, 'alwayseditable'=>1, 'position'=>900),
-'model_pdf'=>array('type'=>'varchar(255)', 'label'=>'Modelpdf', 'enabled'=>1, 'visible'=>0, 'alwayseditable'=>1, 'position'=>90),
-'status'=>array('type'=>'integer', 'label'=>'Status', 'enabled'=>1, 'visible'=>-1, 'notnull'=>1, 'alwayseditable'=>1, 'position'=>500),
-'fk_reservatorio'=>array('type'=>'integer', 'label'=>'Fkreservatorio', 'enabled'=>1, 'visible'=>-1, 'notnull'=>1, 'alwayseditable'=>1, 'position'=>100, 'css'=>'maxwidth500 widthcentpercentminusxx'),
-);
-// END MODULEBUILDER PROPERTIES
+	/**
+	 * @var array  Array with all fields into database and their property. Do not use it as a static var. It may be modified by constructor.
+	 */
+	public $fields = array(
+		'rowid'         => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>1, 'visible'=>-2, 'noteditable'=>1, 'notnull'=> 1, 'index'=>1, 'position'=>1, 'comment'=>'Id', 'css'=>'left'),
+		'entity'        => array('type'=>'integer', 'label'=>'Entity', 'enabled'=>1, 'visible'=>0, 'notnull'=> 1, 'default'=>1, 'index'=>1, 'position'=>10),
+		'ref'           => array('type'=>'varchar(128)', 'label'=>'Ref', 'enabled'=>1, 'visible'=>1, 'noteditable'=>0, 'default'=>'', 'notnull'=> 1, 'showoncombobox'=>1, 'index'=>1, 'position'=>20, 'searchall'=>1, 'comment'=>'Reference of object', 'validate'=>1),
+		'label'         => array('type'=>'varchar(255)', 'label'=>'Label', 'enabled'=>1, 'visible'=>1, 'position'=>30, 'searchall'=>1, 'css'=>'minwidth300', 'cssview'=>'wordbreak', 'help'=>'Help text', 'showoncombobox'=>2, 'validate'=>1, 'alwayseditable'=>1),
+		'amount'        => array('type'=>'price', 'label'=>'Amount', 'enabled'=>1, 'visible'=>1, 'default'=>'null', 'position'=>40, 'searchall'=>0, 'isameasure'=>1, 'help'=>'Help text for amount', 'validate'=>1),
+		'qty'           => array('type'=>'real', 'label'=>'Qty', 'enabled'=>1, 'visible'=>1, 'default'=>'0', 'position'=>45, 'searchall'=>0, 'isameasure'=>1, 'help'=>'Help text for quantity', 'css'=>'maxwidth75imp', 'validate'=>1),
+		'fk_soc' 		=> array('type'=>'integer:Societe:societe/class/societe.class.php:1:((status:=:1) AND (entity:IN:__SHARED_ENTITIES__))', 'picto'=>'company', 'label'=>'ThirdParty', 'visible'=> 1, 'enabled'=>'isModEnabled("societe")', 'position'=>50, 'notnull'=>-1, 'index'=>1, 'help'=>'OrganizationEventLinkToThirdParty', 'validate'=>1, 'css'=>'maxwidth500 widthcentpercentminusxx', 'csslist'=>'tdoverflowmax150'),
+		'fk_project'    => array('type'=>'integer:Project:projet/class/project.class.php:1', 'label'=>'Project', 'picto'=>'project', 'enabled'=>'isModEnabled("project")', 'visible'=>-1, 'position'=>52, 'notnull'=>-1, 'index'=>1, 'validate'=>1, 'css'=>'maxwidth500 widthcentpercentminusxx', 'csslist'=>'tdoverflowmax150'),
+		'description'   => array('type'=>'text', 'label'=>'Description', 'enabled'=>1, 'visible'=>3, 'position'=>60, 'validate'=>1),
+		'note_public'   => array('type'=>'html', 'label'=>'NotePublic', 'enabled'=>1, 'visible'=>0, 'position'=>61, 'validate'=>1, 'cssview'=>'wordbreak'),
+		'note_private'  => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>1, 'visible'=>0, 'position'=>62, 'validate'=>1, 'cssview'=>'wordbreak'),
+		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>1, 'visible'=>-2, 'notnull'=> 1, 'position'=>500),
+		'tms'           => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>1, 'visible'=>-2, 'notnull'=> 0, 'position'=>501),
+		//'date_validation '    =>array('type'=>'datetime',     'label'=>'DateCreation',     'enabled'=>1, 'visible'=>-2, 'position'=>502),
+		'fk_user_creat' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'picto'=>'user', 'enabled'=>1, 'visible'=>-2, 'notnull'=> 1, 'position'=>510, 'foreignkey'=>'user.rowid', 'csslist'=>'tdoverflowmax150'),
+		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModif', 'picto'=>'user', 'enabled'=>1, 'visible'=>-2, 'notnull'=>-1, 'position'=>511, 'csslist'=>'tdoverflowmax150'),
+		//'fk_user_valid' => array('type'=>'integer:User:user/class/user.class.php',      'label'=>'UserValidation',        'enabled'=>1, 'visible'=>-1, 'position'=>512),
+		'last_main_doc' => array('type'=>'varchar(255)', 'label'=>'LastMainDoc', 'enabled'=>1, 'visible'=>0, 'notnull'=>0, 'position'=>600),
+		'import_key'    => array('type'=>'varchar(14)', 'label'=>'ImportId', 'enabled'=>1, 'visible'=>-2, 'notnull'=>-1, 'index'=>0, 'position'=>1000),
+		'model_pdf' 	=> array('type'=>'varchar(255)', 'label'=>'Model pdf', 'enabled'=>1, 'visible'=>0, 'notnull'=>-1, 'position'=>1010),
+		'status'        => array('type'=>'integer', 'label'=>'Status', 'enabled'=>1, 'visible'=>1, 'notnull'=> 1, 'default'=>0, 'index'=>1, 'position'=>2000, 'arrayofkeyval'=>array(0=>'Draft', 1=>'Validated', 9=>'Canceled'), 'validate'=>1),
+	);
 
+	/**
+	 * @var int ID
+	 */
+	public $rowid;
+
+	/**
+	 * @var string Ref
+	 */
+	public $ref;
+
+	/**
+	 * @var int Entity
+	 */
+	public $entity;
+
+	/**
+	 * @var string label
+	 */
+	public $label;
+
+	/**
+	 * @var string amount
+	 */
+	public $amount;
+
+	/**
+	 * @var int Thirdparty ID
+	 */
+	public $socid;		// both socid and fk_soc are used
+	public $fk_soc;		// both socid and fk_soc are used
+
+	/**
+	 * @var int Status
+	 */
+	public $status;
+
+	/**
+	 * @var integer|string date_creation
+	 */
+	public $date_creation;
+
+	/**
+	 * @var integer tms
+	 */
+	public $tms;
+
+	/**
+	 * @var int ID
+	 */
+	public $fk_user_creat;
+
+	/**
+	 * @var int ID
+	 */
+	public $fk_user_modif;
+
+	/**
+	 * @var string public $last_main_doc
+	 */
+	public $last_main_doc;
+
+	/**
+	 * @var string import_key
+	 */
+	public $import_key;
+	// END MODULEBUILDER PROPERTIES
 
 
 	// If this object has a subtable with lines
@@ -1130,7 +1200,7 @@ public $fields=array(
 		global $conf, $langs;
 
 		$result = 0;
-		$includedocgeneration = 1;
+		$includedocgeneration = 0;
 
 		$langs->load("frota@frota");
 

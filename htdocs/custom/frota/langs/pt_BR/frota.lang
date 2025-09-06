@@ -26,7 +26,7 @@ ModuleMyModuleDesc = MyModule description
 # Admin page
 #
 MyModuleSetup = MyModule setup
-Settings = Settings
+Settings = Configurações
 MyModuleSetupPage = MyModule setup page
 MYMODULE_MYPARAM1 = My param 1
 MYMODULE_MYPARAM1Tooltip = My param 1 tooltip
@@ -52,3 +52,6 @@ MyPageName = My page name
 #
 MyWidget = My widget
 MyWidgetDescription = My widget description
+
+
+New = Novo

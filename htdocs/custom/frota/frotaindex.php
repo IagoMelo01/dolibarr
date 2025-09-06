@@ -57,6 +57,9 @@ if (!$res) {
 }
 
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
+require_once DOL_DOCUMENT_ROOT.'/custom/frota/class/reservatorio.class.php';
+require_once DOL_DOCUMENT_ROOT.'/custom/frota/class/manutencao.class.php';
+require_once DOL_DOCUMENT_ROOT.'/custom/frota/class/veiculo.class.php';
 
 // Load translation files required by the page
 $langs->loadLangs(array("frota@frota"));
@@ -241,6 +244,129 @@ if (isModEnabled('frota') && $user->hasRight('frota', 'read')) {
 
 print '</div></div>';
 
+print '<h3> Reservatórios (últimos 8) </h3>';
+
+print '<div style="display: flex; flex: 1; flex-wrap: wrap; width: 100%;">';
+
+$reservoir = new Reservatorio($db);
+$reservoirs = $reservoir->fetchAll('DESC','rowid',8);
+$reservoirs_js = [];
+foreach($reservoirs as $key){
+	print $key->getKanbanView(0);
+	$reservoirs_js[] = [$key->ref, $key->nivel];
+}
+// print $reservoir->getKanbanView(0);
+// echo '<pre>';
+
+// print_r($reservoirs_js);
+
+// echo '</pre>';
+
+print '</div>';
+?>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <canvas id="reservoirChart" style="width: 100%; max-height: 20rem;"></canvas>
+
+    <script>
+        // Recupere os dados dos reservatórios do PHP
+        var reservoirsData = <?php echo json_encode($reservoirs_js); ?>;
+
+        // Extrai os nomes e níveis dos reservatórios
+        var reservoirNames = reservoirsData.map(function(reservoir) {
+			// alert(reservoir[1])
+            return reservoir[0];
+        });
+
+        var reservoirLevels = reservoirsData.map(function(reservoir) {
+            return reservoir[1];
+        });
+
+
+        // Crie um gráfico de barras
+        var ctx = document.getElementById('reservoirChart').getContext('2d');
+        var reservoirChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: reservoirNames,
+                datasets: [{
+                    label: 'Nível dos Reservatórios',
+                    data: reservoirLevels,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)', // Cor de fundo das barras
+                    borderColor: 'rgba(54, 162, 235, 1)', // Cor da borda das barras
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    </script>
+
+
+
+
+<style>
+.veiculo {
+	width: 100%;
+	border-collapse: collapse;
+}
+.veiculo, .veic_th, .veic_td {
+	border: 1px solid black;
+	padding: 8px;
+	text-align: left;
+}
+</style>
+
+
+<?php
+// Array de objetos com informações de manutenção de veículos
+$manutencoes_obj = new Manutencao($db);
+$manutencoes= $manutencoes_obj->fetchAll('DESC','rowid',8);
+
+// print_r($manutencoes);
+
+// Função para formatar a data no formato desejado
+function formatarData($data) {
+    return date("d/m/Y", strtotime($data));
+}
+
+if($manutencoes > 0) {
+    echo '<h2>Últimas Manutenções de Veículos</h2>';
+    echo '<table class="veiculo">';
+    echo '<tr>';
+    echo '<th class="veic_th">Manutenção</th>';
+    echo '<th class="veic_th">Veículo</th>';
+    echo '<th class="veic_th">Data Prevista</th>';
+    echo '<th class="veic_th">Data Realizada</th>';
+    echo '</tr>';
+    foreach ($manutencoes as $manutencao) {
+		$veiculo = new Veiculo($db);
+		$veiculo->fetch($manutencao->fk_veiculo);
+        echo '<tr>';
+        echo '<td class="veic_td"><i class="fas fa-wrench"></i>		' . $manutencao->ref . '</td>';
+        echo '<td class="veic_td">' . $veiculo->ref . '</td>';
+        echo '<td class="veic_td">' . formatarData($manutencao->data_prevista) . '</td>';
+        echo '<td class="veic_td">' . ($manutencao->data_realizada ? formatarData($manutencao->data_concluida) : '-') . '</td>';
+        echo '</tr>';
+    }
+    echo '</table>';
+};
+
+?>
+
+
+<?php
 // End of page
 llxFooter();
 $db->close();
+
+?>

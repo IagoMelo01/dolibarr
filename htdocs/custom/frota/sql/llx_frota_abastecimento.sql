@@ -33,6 +33,12 @@ CREATE TABLE llx_frota_abastecimento(
 	last_main_doc varchar(255), 
 	import_key varchar(14), 
 	model_pdf varchar(255), 
-	status integer NOT NULL
+	status integer NOT NULL, 
+	fk_veiculo integer NOT NULL, 
+	fk_reservatorio integer NOT NULL, 
+	qty_real double(12,2), 
+	km double(12,2), 
+	horas_op double(12,2), 
+	data_ab datetime NOT NULL
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;
