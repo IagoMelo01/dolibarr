@@ -93,3 +93,7 @@ phpstan_custom.neon
 
 # ignore .htaccess files
 .htaccess
+
+#ignore docker-compose files
+docker-compose.yml
+docker-compose.override.yml
