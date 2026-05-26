@@ -67,6 +67,10 @@ RUN set -eux; \
     echo "upload_max_filesize=256M"; \
     echo "post_max_size=256M"; \
     echo "max_execution_time=300"; \
+    echo "display_errors=Off"; \
+    echo "display_startup_errors=Off"; \
+    echo "log_errors=On"; \
+    echo "error_reporting=E_ALL & ~E_WARNING & ~E_NOTICE & ~E_DEPRECATED"; \
     echo "opcache.enable=1"; \
     echo "opcache.validate_timestamps=1"; \
     echo "opcache.memory_consumption=128"; \
