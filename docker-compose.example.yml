@@ -43,20 +43,40 @@ services:
       MYSQL_USER: dolibarr
       MYSQL_PASSWORD: dolipass
     command:
-      [
-        "--character-set-server=utf8mb4",
-        "--collation-server=utf8mb4_unicode_ci",
-      ]
+      - --innodb-buffer-pool-size=128M
+      - --max-connections=30
+      - --performance-schema=OFF
+      - --table-open-cache=200
+      - --tmp-table-size=32M
+      - --max-heap-table-size=32M
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    mem_limit: 384m
     volumes:
       - db_data:/var/lib/mysql
       - ./my.cnf:/root/dolifevo/my.cnf:ro
     init: true
-    mem_limit: 1024m
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
       interval: 20s
       timeout: 5s
       retries: 10
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: dolibarr-phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8009:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 256M
+    init: true
+    mem_limit: 256m
 
 volumes:
   db_data:
